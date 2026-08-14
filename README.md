@@ -7,9 +7,9 @@ přihlášení administrátora a veřejná stránka stolu.
 Etapa 1 přidává administraci hospody: úpravu základních údajů, správu stolů
 s QR odkazy a správu kategorií/položek menu.
 
-Etapa 1.1 (zatím část podle kapitoly 11 hlavního plánu) přidává tisk QR
-stojánků a test naskenování/obnovu QR tokenu stolu. Průvodce založením
-hospody a import menu z PDF/fotky ještě chybí.
+Etapa 1.1 (zatím část podle kapitoly 11 hlavního plánu) přidává průvodce
+založením hospody, tisk QR stojánků a test naskenování/obnovu QR tokenu
+stolu. Import menu z PDF/fotky přes OCR/AI ještě chybí.
 
 > Poznámka: kód je hotový a připravený, ale tenhle sandbox nemá přístup k npm
 > registru, takže tady nešlo spustit `npm install` ani ověřit build. Než to
@@ -40,7 +40,8 @@ Aplikace poběží na `http://localhost:5173`.
 
 - Admin: `http://localhost:5173/admin/login` — přihlas se e-mailem a heslem
   uživatele, kterého jsi založil v kroku 1.3. Po přihlášení uvidíš seznam
-  hospod, ke kterým máš přiřazenou roli (mělo by tam být "Hospoda U lípy").
+  hospod, ke kterým máš přiřazenou roli (mělo by tam být "Hospoda U lípy"),
+  a formulář pro založení další hospody.
 - Veřejná stránka stolu: `http://localhost:5173/v/u-lipy/t/<qr_token>` —
   token vezmi z výstupu seed skriptu.
 
@@ -64,6 +65,11 @@ Aplikace poběží na `http://localhost:5173`.
 
 ## 3c) Co je hotové (Etapa 1.1 — část)
 
+- průvodce založením hospody přímo z `/admin` — formulář (název + adresa)
+  volá bezpečnou RPC funkci `create_venue_for_current_user` (migrace 0004),
+  která atomicky založí hospodu a přihlášeného uživatele v ní rovnou udělá
+  MAJITELEM (RLS na `venues`/`venue_users` záměrně nemá insert policy pro
+  běžné uživatele, aby si nikdo nešel přiřadit roli k cizí hospodě),
 - `/admin/hospoda/:venueId/tisk` — generátor tiskových QR stojánků pro
   všechny aktivní stoly (QR obrázek vygenerovaný na klientovi knihovnou
   `qrcode`, tisk přes `window.print()` s vlastním `@media print` stylem),
@@ -72,17 +78,17 @@ Aplikace poběží na `http://localhost:5173`.
 - ruční značka "Otestováno" pro potvrzení testovacího skenu stolu
   (sloupec `tables.tested_at`, migrace 0003).
 
-Zbytek Etapy 1.1 (průvodce založením hospody, import menu z PDF/fotky přes
-OCR/AI) zatím chybí — jde o samostatnou větší funkci, viz kapitola 6.2
-hlavního plánu.
+Zbytek Etapy 1.1 (import menu z PDF/fotky přes OCR/AI, kontrola a
+publikování konceptu menu) zatím chybí — jde o samostatnou větší funkci,
+viz kapitola 6.2 hlavního plánu.
 
 ## 4) Co záměrně chybí (přijde v dalších etapách)
 
-Průvodce založením hospody a import menu z PDF/fotky (zbytek Etapy 1.1).
-Košík a odesílání objednávky, kuchyňská obrazovka, QR platba, tržby, hry — viz
-kapitola 11 hlavního plánu (Etapa 2 a dál). Podle pravidel pro vývoj
-(kapitola 13) se nemá programovat všechno najednou — tohle je záměrně jen
-základ, na kterém se dá stavět.
+Import menu z PDF/fotky přes OCR/AI (zbytek Etapy 1.1). Košík a odesílání
+objednávky, kuchyňská obrazovka, QR platba, tržby, hry — viz kapitola 11
+hlavního plánu (Etapa 2 a dál). Podle pravidel pro vývoj (kapitola 13) se
+nemá programovat všechno najednou — tohle je záměrně jen základ, na kterém
+se dá stavět.
 
 ## 5) Nasazení
 
