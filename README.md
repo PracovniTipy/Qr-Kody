@@ -1,8 +1,11 @@
-# StůlHraje — Etapa 0 (technický základ)
+# StůlHraje — Etapa 0 + Etapa 1
 
-Tohle je technický základ podle kapitoly 14 hlavního plánu: React/TypeScript PWA,
-napojení na Supabase, migrace pro hospody/uživatele/stoly/menu, přihlášení
-administrátora a veřejná stránka stolu se testovacím menu.
+Technický základ (Etapa 0) podle kapitoly 14 hlavního plánu: React/TypeScript
+PWA, napojení na Supabase, migrace pro hospody/uživatele/stoly/menu,
+přihlášení administrátora a veřejná stránka stolu.
+
+Etapa 1 přidává administraci hospody: úpravu základních údajů, správu stolů
+s QR odkazy a správu kategorií/položek menu.
 
 > Poznámka: kód je hotový a připravený, ale tenhle sandbox nemá přístup k npm
 > registru, takže tady nešlo spustit `npm install` ani ověřit build. Než to
@@ -48,12 +51,20 @@ Aplikace poběží na `http://localhost:5173`.
 - základní PWA nastavení (manifest, ikonky — ikony `public/icon-192.png` a
   `public/icon-512.png` zatím chybí, doplň je než budeš nasazovat naostro).
 
+## 3b) Co je hotové (Etapa 1)
+
+- `/admin/hospoda/:venueId` — úprava názvu/slugu/aktivity hospody (jen role
+  MAJITEL/MANAZER, vynucuje RLS pravidlo `venues_update_manager`),
+- správa stolů: přidání, deaktivace, smazání, QR odkaz ke zkopírování,
+- správa kategorií a položek menu: přidání, úprava, skrytí, smazání.
+
 ## 4) Co záměrně chybí (přijde v dalších etapách)
 
 Košík a odesílání objednávky, kuchyňská obrazovka, QR platba, tržby, hry — viz
-kapitola 11 hlavního plánu (Etapa 1 a dál). Podle pravidel pro vývoj
-(kapitola 13) se nemá programovat všechno najednou — tohle je záměrně jen
-základ, na kterém se dá stavět.
+kapitola 11 hlavního plánu (Etapa 2 a dál). Tisk QR stojánků a import menu
+z PDF/fotky je Etapa 1.1. Podle pravidel pro vývoj (kapitola 13) se nemá
+programovat všechno najednou — tohle je záměrně jen základ, na kterém se dá
+stavět.
 
 ## 5) Nasazení
 
