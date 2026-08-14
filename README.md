@@ -1,4 +1,4 @@
-# StůlHraje — Etapa 0 + Etapa 1
+# StůlHraje — Etapa 0 + Etapa 1 + Etapa 1.1 (částečně)
 
 Technický základ (Etapa 0) podle kapitoly 14 hlavního plánu: React/TypeScript
 PWA, napojení na Supabase, migrace pro hospody/uživatele/stoly/menu,
@@ -6,6 +6,10 @@ přihlášení administrátora a veřejná stránka stolu.
 
 Etapa 1 přidává administraci hospody: úpravu základních údajů, správu stolů
 s QR odkazy a správu kategorií/položek menu.
+
+Etapa 1.1 (zatím část podle kapitoly 11 hlavního plánu) přidává tisk QR
+stojánků a test naskenování/obnovu QR tokenu stolu. Průvodce založením
+hospody a import menu z PDF/fotky ještě chybí.
 
 > Poznámka: kód je hotový a připravený, ale tenhle sandbox nemá přístup k npm
 > registru, takže tady nešlo spustit `npm install` ani ověřit build. Než to
@@ -58,13 +62,27 @@ Aplikace poběží na `http://localhost:5173`.
 - správa stolů: přidání, deaktivace, smazání, QR odkaz ke zkopírování,
 - správa kategorií a položek menu: přidání, úprava, skrytí, smazání.
 
+## 3c) Co je hotové (Etapa 1.1 — část)
+
+- `/admin/hospoda/:venueId/tisk` — generátor tiskových QR stojánků pro
+  všechny aktivní stoly (QR obrázek vygenerovaný na klientovi knihovnou
+  `qrcode`, tisk přes `window.print()` s vlastním `@media print` stylem),
+- obnova (zneplatnění) QR tokenu stolu tlačítkem "Nový QR" — starý odkaz
+  přestane fungovat, číslo stolu zůstane stejné,
+- ruční značka "Otestováno" pro potvrzení testovacího skenu stolu
+  (sloupec `tables.tested_at`, migrace 0003).
+
+Zbytek Etapy 1.1 (průvodce založením hospody, import menu z PDF/fotky přes
+OCR/AI) zatím chybí — jde o samostatnou větší funkci, viz kapitola 6.2
+hlavního plánu.
+
 ## 4) Co záměrně chybí (přijde v dalších etapách)
 
+Průvodce založením hospody a import menu z PDF/fotky (zbytek Etapy 1.1).
 Košík a odesílání objednávky, kuchyňská obrazovka, QR platba, tržby, hry — viz
-kapitola 11 hlavního plánu (Etapa 2 a dál). Tisk QR stojánků a import menu
-z PDF/fotky je Etapa 1.1. Podle pravidel pro vývoj (kapitola 13) se nemá
-programovat všechno najednou — tohle je záměrně jen základ, na kterém se dá
-stavět.
+kapitola 11 hlavního plánu (Etapa 2 a dál). Podle pravidel pro vývoj
+(kapitola 13) se nemá programovat všechno najednou — tohle je záměrně jen
+základ, na kterém se dá stavět.
 
 ## 5) Nasazení
 
