@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabaseClient'
 
 interface MyVenue {
   role: string
-  venues: { name: string; slug: string } | null
+  venues: { id: string; name: string; slug: string } | null
 }
 
 /**
- * Etapa 0: jen ověřuje, že přihlášený admin/obsluha vidí přes RLS pravidla
- * pouze hospody, ke kterým má přiřazenou roli ve venue_users.
- * Skutečná administrace menu, stolů a objednávek přijde v dalších etapách.
+ * Přehled hospod, ke kterým má přihlášený uživatel přiřazenou roli (RLS
+ * pravidlo venue_users_select_own). Klik na hospodu vede do administrace
+ * (Etapa 1) – stoly, QR odkazy a menu.
  */
 export function AdminDashboardPage() {
   const [venues, setVenues] = useState<MyVenue[]>([])
@@ -21,7 +22,7 @@ export function AdminDashboardPage() {
 
     supabase
       .from('venue_users')
-      .select('role, venues(name, slug)')
+      .select('role, venues(id, name, slug)')
       .then(({ data, error: queryError }) => {
         if (!active) return
         if (queryError) {
@@ -56,10 +57,19 @@ export function AdminDashboardPage() {
         <p>K tvému účtu zatím není přiřazená žádná hospoda.</p>
       )}
 
-      <ul>
+      <ul className="entity-list">
         {venues.map((v, i) => (
           <li key={i}>
-            <strong>{v.venues?.name ?? '(bez názvu)'}</strong> — role: {v.role}
+            <div className="entity-main">
+              {v.venues ? (
+                <Link to={`/admin/hospoda/${v.venues.id}`}>
+                  <strong>{v.venues.name}</strong>
+                </Link>
+              ) : (
+                <strong>(bez názvu)</strong>
+              )}
+              <p className="menu-item-desc">role: {v.role}</p>
+            </div>
           </li>
         ))}
       </ul>
