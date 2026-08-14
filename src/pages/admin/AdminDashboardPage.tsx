@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabaseClient'
+import { CreateVenueForm } from '../../components/admin/CreateVenueForm'
 
 interface MyVenue {
   role: string
@@ -10,7 +11,8 @@ interface MyVenue {
 /**
  * Přehled hospod, ke kterým má přihlášený uživatel přiřazenou roli (RLS
  * pravidlo venue_users_select_own). Klik na hospodu vede do administrace
- * (Etapa 1) – stoly, QR odkazy a menu.
+ * (Etapa 1) – stoly, QR odkazy a menu. Etapa 1.1 přidává CreateVenueForm
+ * pro založení nové hospody přímo z UI.
  */
 export function AdminDashboardPage() {
   const [venues, setVenues] = useState<MyVenue[]>([])
@@ -54,7 +56,7 @@ export function AdminDashboardPage() {
       {error && <p className="error">{error}</p>}
 
       {!loading && !error && venues.length === 0 && (
-        <p>K tvému účtu zatím není přiřazená žádná hospoda.</p>
+        <p>K tvému účtu zatím není přiřazena žádná hospoda.</p>
       )}
 
       <ul className="entity-list">
@@ -73,6 +75,8 @@ export function AdminDashboardPage() {
           </li>
         ))}
       </ul>
+
+      <CreateVenueForm />
     </div>
   )
 }
