@@ -309,3 +309,117 @@ button.danger {
   margin: 0;
   color: #f2ede3;
 }
+
+/* --- Etapa 1.1: QR stojánky a test skenu --- */
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.panel-header h2 {
+  margin: 0;
+}
+
+.qr-stand-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.qr-stand-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.qr-stand-toolbar button {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  background: #d4a94e;
+  color: #171a20;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.qr-stand-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.qr-stand-card {
+  background: #171a20;
+  border: 1px solid #2a2f3a;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.qr-stand-card img {
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.qr-stand-venue {
+  margin: 0;
+  font-weight: 600;
+  color: #d4a94e;
+}
+
+.qr-stand-table {
+  margin: 4px 0 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.qr-stand-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #a9a29a;
+}
+
+@media print {
+  .qr-stand-toolbar {
+    display: none;
+  }
+
+  .qr-stand-page {
+    max-width: none;
+    padding: 0;
+  }
+
+  .qr-stand-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .qr-stand-card {
+    break-inside: avoid;
+    border: 1px solid #000;
+    background: #fff;
+    color: #000;
+  }
+
+  .qr-stand-venue,
+  .qr-stand-table {
+    color: #000;
+  }
+
+  .qr-stand-hint {
+    color: #333;
+  }
+}
