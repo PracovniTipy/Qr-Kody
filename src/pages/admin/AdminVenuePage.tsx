@@ -5,11 +5,14 @@ import { VenueRow, TableRow, MenuCategoryRow, MenuItemRow } from '../../types/ad
 import { VenueSettingsForm } from '../../components/admin/VenueSettingsForm'
 import { TablesManager } from '../../components/admin/TablesManager'
 import { MenuManager } from '../../components/admin/MenuManager'
+import { MenuImportWizard } from '../../components/admin/MenuImportWizard'
 
 /**
  * Etapa 1: administrace jedné hospody – základní údaje, stoly/QR odkazy
  * a kategorie/položky menu. Přístup i zápis hlídá RLS (is_venue_staff /
  * is_venue_manager v migracích 0001 a 0002), tahle stránka je jen UI.
+ * Etapa 1.1 přidává MenuImportWizard – import menu z fotky/PDF přes
+ * Edge Function import-menu (Claude vision API).
  */
 export function AdminVenuePage() {
   const { venueId } = useParams<{ venueId: string }>()
@@ -93,6 +96,13 @@ export function AdminVenuePage() {
       <VenueSettingsForm venue={venue} onSaved={setVenue} />
       <TablesManager venueId={venue.id} venueSlug={venue.slug} tables={tables} onChange={setTables} />
       <MenuManager
+        venueId={venue.id}
+        categories={categories}
+        items={items}
+        onCategoriesChange={setCategories}
+        onItemsChange={setItems}
+      />
+      <MenuImportWizard
         venueId={venue.id}
         categories={categories}
         items={items}
