@@ -13,6 +13,7 @@ export interface TableRow {
   label: string
   qr_token: string
   is_active: boolean
+  tested_at: string | null
 }
 
 export interface MenuCategoryRow {
