@@ -1,0 +1,34 @@
+// Datové typy pro administraci hospody (Etapa 1).
+
+export interface VenueRow {
+  id: string
+  slug: string
+  name: string
+  is_active: boolean
+}
+
+export interface TableRow {
+  id: string
+  venue_id: string
+  label: string
+  qr_token: string
+  is_active: boolean
+}
+
+export interface MenuCategoryRow {
+  id: string
+  venue_id: string
+  name: string
+  sort_order: number
+}
+
+export interface MenuItemRow {
+  id: string
+  venue_id: string
+  category_id: string
+  name: string
+  description: string | null
+  price_czk: number
+  is_available: boolean
+  sort_order: number
+}
