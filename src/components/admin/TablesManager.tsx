@@ -1,4 +1,5 @@
 import { FormEvent, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabaseClient'
 import { TableRow } from '../../types/adminVenue'
 
@@ -12,8 +13,8 @@ interface Props {
 /**
  * Stoly a jejich QR odkazy. qr_token generuje databáze sama (viz sloupec
  * tables.qr_token v migraci 0001), takže admin jen zadá popisek stolu.
- * Tisk QR stojánků (PDF) je součástí Etapy 1.1, tady zatím stačí odkaz
- * ke zkopírování/naskenování.
+ * Etapa 1.1 přidává obnovu (zneplatnění) QR tokenu, značku testovacího
+ * skenu a odkaz na tisk QR stojánků (QrStandPage).
  */
 export function TablesManager({ venueId, venueSlug, tables, onChange }: Props) {
   const [label, setLabel] = useState('')
@@ -65,6 +66,45 @@ export function TablesManager({ venueId, venueSlug, tables, onChange }: Props) {
     }
   }
 
+  async function regenerateToken(t: TableRow) {
+    if (
+      !window.confirm(
+        `Vygenerovat nový QR odkaz pro stůl "${t.label}"? Starý odkaz i vytištěný stojánek přestanou fungovat.`
+      )
+    ) {
+      return
+    }
+
+    const newToken =
+      typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID().replace(/-/g, '')
+        : Math.random().toString(16).slice(2) + Date.now().toString(16)
+
+    const { data, error: updateError } = await supabase
+      .from('tables')
+      .update({ qr_token: newToken, tested_at: null })
+      .eq('id', t.id)
+      .select()
+      .single()
+
+    if (!updateError && data) {
+      onChange(tables.map((row) => (row.id === t.id ? (data as TableRow) : row)))
+    }
+  }
+
+  async function markTested(t: TableRow) {
+    const { data, error: updateError } = await supabase
+      .from('tables')
+      .update({ tested_at: new Date().toISOString() })
+      .eq('id', t.id)
+      .select()
+      .single()
+
+    if (!updateError && data) {
+      onChange(tables.map((row) => (row.id === t.id ? (data as TableRow) : row)))
+    }
+  }
+
   async function handleDelete(t: TableRow) {
     if (!window.confirm(`Opravdu smazat stůl "${t.label}"? QR kód přestane fungovat.`)) return
 
@@ -86,7 +126,12 @@ export function TablesManager({ venueId, venueSlug, tables, onChange }: Props) {
 
   return (
     <div className="panel">
-      <h2>Stoly a QR odkazy</h2>
+      <div className="panel-header">
+        <h2>Stoly a QR odkazy</h2>
+        <Link to={`/admin/hospoda/${venueId}/tisk`} className="back-link">
+          Tisk QR stojánků →
+        </Link>
+      </div>
 
       {tables.length === 0 && <p>Zatím žádné stoly.</p>}
 
@@ -102,6 +147,16 @@ export function TablesManager({ venueId, venueSlug, tables, onChange }: Props) {
             <div className="entity-actions">
               <button type="button" onClick={() => copyLink(t)}>
                 {copiedId === t.id ? 'Zkopírováno' : 'Kopírovat odkaz'}
+              </button>
+              {t.tested_at ? (
+                <span className="success">✓ Otestováno</span>
+              ) : (
+                <button type="button" onClick={() => markTested(t)}>
+                  Označit jako otestované
+                </button>
+              )}
+              <button type="button" onClick={() => regenerateToken(t)}>
+                Nový QR
               </button>
               <button type="button" onClick={() => toggleActive(t)}>
                 {t.is_active ? 'Deaktivovat' : 'Aktivovat'}
