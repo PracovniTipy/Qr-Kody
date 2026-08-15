@@ -12,7 +12,7 @@ naskenování/obnovu QR tokenu stolu a import menu z PDF/fotky přes AI
 (Claude vision).
 
 Etapa 2 (zatím část podle kapitoly 11 hlavního plánu) přidává košík a
-odeslání objednávky ze stránky stolu.
+odeslání objednávky ze stránky stolu a kuchyňskou obrazovku pro personál.
 
 > Poznámka: kód je hotový a připravený, ale tenhle sandbox nemá přístup k npm
 > registru, takže tady nešlo spustit `npm install` ani ověřit build. Než to
@@ -97,18 +97,23 @@ zkontrolovat/upravit a teprve pak publikovat do menu hospody, viz kapitola
   přístup k tabulkám `orders`/`order_items`),
 - host po odeslání (i po refreshi stránky) vidí své poslední objednávky ze
   svého stolu a jejich stav (Přijato/Připravuje se/Hotovo/Zrušena) přes RPC
-  funkci `get_table_orders`.
+  funkci `get_table_orders`,
+- `/admin/hospoda/:venueId/kuchyne` — kuchyňská obrazovka pro personál:
+  přehled aktivních objednávek dané hospody (napříč stoly), tlačítka pro
+  posun stavu (Přijato → Připravuje se → Hotovo) a zrušení. Čtení i zápis
+  jde přímo přes Supabase klienta (chrání to RLS `orders_select_staff` /
+  `orders_update_staff` z migrace 0005, žádná zvláštní RPC funkce tu není
+  potřeba), nové objednávky a změny stavu se promítnou okamžitě přes
+  Supabase Realtime (migrace 0006), s pravidelným obnovením jako zálohou.
 
-Zbytek Etapy 2 (kuchyňská obrazovka pro personál, potvrzování/měnění stavu
-objednávky, QR platba, přehled tržeb, hry) zatím chybí — viz kapitola 11
-hlavního plánu.
+Zbytek Etapy 2 (potvrzování objednávky platbou/QR platba, přehled tržeb,
+hry) zatím chybí — viz kapitola 11 hlavního plánu.
 
 ## 4) Co záměrně chybí (přijde v dalších etapách)
 
-Kuchyňská obrazovka, QR platba, tržby, hry — viz kapitola 11 hlavního
-plánu (zbytek Etapy 2 a dál). Podle pravidel pro vývoj (kapitola 13) se
-nemá programovat všechno najednou — tohle je záměrně jen základ, na kterém
-se dá stavět.
+QR platba, přehled tržeb, hry — viz kapitola 11 hlavního plánu (zbytek
+Etapy 2 a dál). Podle pravidel pro vývoj (kapitola 13) se nemá programovat
+všechno najednou — tohle je záměrně jen základ, na kterém se dá stavět.
 
 ## 5) Nasazení
 
