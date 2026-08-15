@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react'
+import { FormEvent, useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabaseClient'
 import { TableRow } from '../../types/adminVenue'
@@ -14,13 +14,54 @@ interface Props {
  * Stoly a jejich QR odkazy. qr_token generuje databáze sama (viz sloupec
  * tables.qr_token v migraci 0001), takže admin jen zadá popisek stolu.
  * Etapa 1.1 přidává obnovu (zneplatnění) QR tokenu, značku testovacího
- * skenu a odkaz na tisk QR stojánků (QrStandPage).
+ * skenu a odkaz na tisk QR stojánků (QrStandPage). Etapa 2 přidává přehled
+ * nezaplacené útraty stolu a tlačítko pro její označení jako zaplacené
+ * (host platí přes QR platbu na stránce stolu, viz PaymentPanel a migrace
+ * 0007) – čtení i zápis chrání stejné RLS jako zbytek téhle stránky.
  */
 export function TablesManager({ venueId, venueSlug, tables, onChange }: Props) {
   const [label, setLabel] = useState('')
   const [adding, setAdding] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [unpaidTotals, setUnpaidTotals] = useState<Record<string, number>>({})
+
+  const loadUnpaidTotals = useCallback(async () => {
+    const { data } = await supabase
+      .from('orders')
+      .select('table_id, order_items(price_czk_snapshot, quantity)')
+      .eq('venue_id', venueId)
+      .eq('paid', false)
+      .neq('status', 'zrusena')
+
+    const totals: Record<string, number> = {}
+    for (const order of (data ?? []) as {
+      table_id: string
+      order_items: { price_czk_snapshot: number; quantity: number }[]
+    }[]) {
+      const orderTotal = order.order_items.reduce(
+        (sum, it) => sum + it.price_czk_snapshot * it.quantity,
+        0
+      )
+      totals[order.table_id] = (totals[order.table_id] ?? 0) + orderTotal
+    }
+    setUnpaidTotals(totals)
+  }, [venueId])
+
+  useEffect(() => {
+    loadUnpaidTotals()
+  }, [loadUnpaidTotals])
+
+  async function markPaid(t: TableRow) {
+    const { error: updateError } = await supabase
+      .from('orders')
+      .update({ paid: true })
+      .eq('table_id', t.id)
+      .eq('paid', false)
+      .neq('status', 'zrusena')
+
+    if (!updateError) loadUnpaidTotals()
+  }
 
   function tableUrl(qrToken: string) {
     return `${window.location.origin}/v/${venueSlug}/t/${qrToken}`
@@ -143,11 +184,19 @@ export function TablesManager({ venueId, venueSlug, tables, onChange }: Props) {
               <a href={tableUrl(t.qr_token)} target="_blank" rel="noreferrer" className="table-link">
                 {tableUrl(t.qr_token)}
               </a>
+              {unpaidTotals[t.id] > 0 && (
+                <span className="unpaid-badge">K zaplacení: {unpaidTotals[t.id]} Kč</span>
+              )}
             </div>
             <div className="entity-actions">
               <button type="button" onClick={() => copyLink(t)}>
                 {copiedId === t.id ? 'Zkopírováno' : 'Kopírovat odkaz'}
               </button>
+              {unpaidTotals[t.id] > 0 && (
+                <button type="button" onClick={() => markPaid(t)}>
+                  Označit jako zaplaceno
+                </button>
+              )}
               {t.tested_at ? (
                 <span className="success">✓ Otestováno</span>
               ) : (
