@@ -772,3 +772,142 @@ button.danger {
   font-size: 0.8rem;
   font-weight: 600;
 }
+
+/* --- Etapa 4: arkádová hra (Chytání padajících surovin) --- */
+
+.games-link {
+  display: inline-block;
+  margin: 12px 0;
+}
+
+.game-page {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.game-page header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.game-idle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 0;
+}
+
+.game-result {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 0;
+}
+
+.game-result input {
+  background: #171a20;
+  border: 1px solid #2a2f3a;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #f2ede3;
+}
+
+.game-result-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.game-result-hint {
+  color: #d4a94e;
+  font-size: 0.9rem;
+}
+
+.kosik-game {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kosik-hud {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1rem;
+  color: #f2ede3;
+}
+
+.kosik-area {
+  position: relative;
+  height: 400px;
+  background: #171a20;
+  border: 1px solid #2a2f3a;
+  border-radius: 12px;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.kosik-item {
+  position: absolute;
+  font-size: 1.6rem;
+  transform: translate(-50%, 0);
+}
+
+.kosik-basket {
+  position: absolute;
+  bottom: 8px;
+  transform: translate(-50%, 0);
+  font-size: 2rem;
+  text-align: center;
+}
+
+.kosik-hint {
+  font-size: 0.8rem;
+  color: #a9a29a;
+  text-align: center;
+}
+
+.leaderboard {
+  margin-top: 24px;
+}
+
+.leaderboard h2 {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.leaderboard-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.leaderboard-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #171a20;
+  border: 1px solid #2a2f3a;
+  border-radius: 8px;
+}
+
+.leaderboard-rank {
+  color: #a9a29a;
+  width: 24px;
+}
+
+.leaderboard-name {
+  flex: 1;
+  color: #f2ede3;
+}
+
+.leaderboard-score {
+  color: #d4a94e;
+  font-weight: 600;
+}
