@@ -950,3 +950,7 @@ button.danger {
     transform: translateX(-50%) rotate(8deg);
   }
 }
+
+.kosik-thrower {
+  transition: left 0.25s ease-out;
+}
