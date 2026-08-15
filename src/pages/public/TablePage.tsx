@@ -149,9 +149,14 @@ export function TablePage() {
         <p>Stůl {context.table.label}</p>
       </header>
 
-      <Link to={`/v/${venueSlug}/t/${tableToken}/hra`} className="games-link">
-        🎮 Hrát
-      </Link>
+      <div className="games-links">
+        <Link to={`/v/${venueSlug}/t/${tableToken}/hra`} className="games-link">
+          🥕 Chytání surovin
+        </Link>
+        <Link to={`/v/${venueSlug}/t/${tableToken}/hra-let`} className="games-link">
+          🐦 Let mezi sudy
+        </Link>
+      </div>
 
       <OrdersList orders={orders} />
 
