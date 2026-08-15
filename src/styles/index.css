@@ -548,3 +548,117 @@ button.danger {
   font-size: 0.85rem;
   color: #a9a29a;
 }
+
+/* --- Etapa 2 (část): kuchyňská obrazovka --- */
+
+.kitchen-link {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #2a2f3a;
+  color: #d4a94e;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.kitchen-link:hover {
+  border-color: #d4a94e;
+}
+
+.kitchen-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.kitchen-page header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.kitchen-orders {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.kitchen-order {
+  background: #171a20;
+  border: 1px solid #2a2f3a;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kitchen-order-pripravuje_se {
+  border-color: #4e9dd4;
+}
+
+.kitchen-order-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kitchen-order-table {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.kitchen-order-note {
+  font-size: 0.85rem;
+  color: #a9a29a;
+  margin: 0;
+}
+
+.kitchen-item-note {
+  color: #a9a29a;
+}
+
+.kitchen-order-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.kitchen-order-actions button {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background: #d4a94e;
+  color: #171a20;
+  font-weight: 600;
+  cursor: pointer;
+  flex: 1;
+}
+
+.kitchen-order-actions button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.kitchen-order-actions button.kitchen-cancel {
+  background: transparent;
+  border: 1px solid #e0665a;
+  color: #e0665a;
+  flex: none;
+}
+
+.kitchen-finished {
+  margin-top: 32px;
+}
+
+.kitchen-finished h2 {
+  color: #d4a94e;
+  font-size: 1.1rem;
+  border-bottom: 1px solid #2a2f3a;
+  padding-bottom: 4px;
+}
