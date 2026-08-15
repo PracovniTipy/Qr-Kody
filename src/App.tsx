@@ -4,6 +4,7 @@ import { AdminDashboardPage } from './pages/admin/AdminDashboardPage'
 import { AdminVenuePage } from './pages/admin/AdminVenuePage'
 import { QrStandPage } from './pages/admin/QrStandPage'
 import { KitchenPage } from './pages/admin/KitchenPage'
+import { RevenuePage } from './pages/admin/RevenuePage'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { TablePage } from './pages/public/TablePage'
 
@@ -18,6 +19,7 @@ export function App() {
         <Route path="/admin/hospoda/:venueId" element={<AdminVenuePage />} />
         <Route path="/admin/hospoda/:venueId/tisk" element={<QrStandPage />} />
           <Route path="/admin/hospoda/:venueId/kuchyne" element={<KitchenPage />} />
+        <Route path="/admin/hospoda/:venueId/trzby" element={<RevenuePage />} />
       </Route>
 
       <Route path="/v/:venueSlug/t/:tableToken" element={<TablePage />} />
