@@ -1,4 +1,4 @@
-# StůlHraje — Etapa 0 + Etapa 1 + Etapa 1.1 (částečně)
+# StůlHraje — Etapa 0 + Etapa 1 + Etapa 1.1 + Etapa 2 (částečně)
 
 Technický základ (Etapa 0) podle kapitoly 14 hlavního plánu: React/TypeScript
 PWA, napojení na Supabase, migrace pro hospody/uživatele/stoly/menu,
@@ -7,9 +7,12 @@ přihlášení administrátora a veřejná stránka stolu.
 Etapa 1 přidává administraci hospody: úpravu základních údajů, správu stolů
 s QR odkazy a správu kategorií/položek menu.
 
-Etapa 1.1 (zatím část podle kapitoly 11 hlavního plánu) přidává průvodce
-založením hospody, tisk QR stojánků a test naskenování/obnovu QR tokenu
-stolu. Import menu z PDF/fotky přes OCR/AI ještě chybí.
+Etapa 1.1 přidává průvodce založením hospody, tisk QR stojánků, test
+naskenování/obnovu QR tokenu stolu a import menu z PDF/fotky přes AI
+(Claude vision).
+
+Etapa 2 (zatím část podle kapitoly 11 hlavního plánu) přidává košík a
+odeslání objednávky ze stránky stolu.
 
 > Poznámka: kód je hotový a připravený, ale tenhle sandbox nemá přístup k npm
 > registru, takže tady nešlo spustit `npm install` ani ověřit build. Než to
@@ -78,15 +81,32 @@ Aplikace poběží na `http://localhost:5173`.
 - ruční značka "Otestováno" pro potvrzení testovacího skenu stolu
   (sloupec `tables.tested_at`, migrace 0003).
 
-Zbytek Etapy 1.1 (import menu z PDF/fotky přes OCR/AI, kontrola a
-publikování konceptu menu) zatím chybí — jde o samostatnou větší funkci,
-viz kapitola 6.2 hlavního plánu.
+Import menu z PDF/fotky přes AI (Claude vision, Edge Function `import-menu`)
+je hotový — průvodce rozpozná položky a ceny z fotky/PDF, dají se ručně
+zkontrolovat/upravit a teprve pak publikovat do menu hospody, viz kapitola
+6.2 hlavního plánu.
+
+## 3d) Co je hotové (Etapa 2 — část)
+
+- veřejná stránka stolu má košík: krokový výběr množství u každé položky
+  menu, lišta s počtem kusů a celkovou cenou dole na obrazovce,
+- odeslání objednávky přes bezpečnou RPC funkci `submit_order` (migrace
+  0005) — server podle `qr_token` ověří, že stůl i hospoda jsou aktivní, a
+  že každá položka patří dané hospodě a je dostupná, teprve pak objednávku
+  založí (stejný vzor jako `get_table_context`: host nikdy nemá přímý
+  přístup k tabulkám `orders`/`order_items`),
+- host po odeslání (i po refreshi stránky) vidí své poslední objednávky ze
+  svého stolu a jejich stav (Přijato/Připravuje se/Hotovo/Zrušena) přes RPC
+  funkci `get_table_orders`.
+
+Zbytek Etapy 2 (kuchyňská obrazovka pro personál, potvrzování/měnění stavu
+objednávky, QR platba, přehled tržeb, hry) zatím chybí — viz kapitola 11
+hlavního plánu.
 
 ## 4) Co záměrně chybí (přijde v dalších etapách)
 
-Import menu z PDF/fotky přes OCR/AI (zbytek Etapy 1.1). Košík a odesílání
-objednávky, kuchyňská obrazovka, QR platba, tržby, hry — viz kapitola 11
-hlavního plánu (Etapa 2 a dál). Podle pravidel pro vývoj (kapitola 13) se
+Kuchyňská obrazovka, QR platba, tržby, hry — viz kapitola 11 hlavního
+plánu (zbytek Etapy 2 a dál). Podle pravidel pro vývoj (kapitola 13) se
 nemá programovat všechno najednou — tohle je záměrně jen základ, na kterém
 se dá stavět.
 
