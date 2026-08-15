@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabaseClient'
 import { TableContext } from '../../types/tableContext'
 import { OrderSummary } from '../../types/order'
@@ -16,7 +16,8 @@ import { PaymentPanel } from '../../components/PaymentPanel'
  * přes bezpečnou RPC funkci submit_order, která si sama ověří platnost tokenu stolu
  * (stejný vzor jako get_table_context) – klient nikdy nezapisuje do orders/order_items
  * přímo. Kuchyňská obrazovka (KitchenPage) a QR platba (PaymentPanel) jsou taky
- * hotové – zbývá přehled tržeb a hry, viz kapitola 11 hlavního plánu.
+ * hotové, stejně jako přehled tržeb. Přidána i první arkádová hra (Etapa 4) –
+ * odkaz "Hrát" vede na GamePage. Zbytek her a další kapitoly viz masterplán.
  */
 export function TablePage() {
   const { venueSlug, tableToken } = useParams<{ venueSlug: string; tableToken: string }>()
@@ -147,6 +148,10 @@ export function TablePage() {
         <h1>{context.venue.name}</h1>
         <p>Stůl {context.table.label}</p>
       </header>
+
+      <Link to={`/v/${venueSlug}/t/${tableToken}/hra`} className="games-link">
+        🎮 Hrát
+      </Link>
 
       <OrdersList orders={orders} />
 
