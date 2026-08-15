@@ -11,8 +11,9 @@ Etapa 1.1 přidává průvodce založením hospody, tisk QR stojánků, test
 naskenování/obnovu QR tokenu stolu a import menu z PDF/fotky přes AI
 (Claude vision).
 
-Etapa 2 (zatím část podle kapitoly 11 hlavního plánu) přidává košík a
-odeslání objednávky ze stránky stolu a kuchyňskou obrazovku pro personál.
+Etapa 2 (zatím část podle kapitoly 11 hlavního plánu) přidává košík,
+odeslání objednávky ze stránky stolu, kuchyňskou obrazovku pro personál a
+QR platbu.
 
 > Poznámka: kód je hotový a připravený, ale tenhle sandbox nemá přístup k npm
 > registru, takže tady nešlo spustit `npm install` ani ověřit build. Než to
@@ -106,12 +107,24 @@ zkontrolovat/upravit a teprve pak publikovat do menu hospody, viz kapitola
   potřeba), nové objednávky a změny stavu se promítnou okamžitě přes
   Supabase Realtime (migrace 0006), s pravidelným obnovením jako zálohou.
 
-Zbytek Etapy 2 (potvrzování objednávky platbou/QR platba, přehled tržeb,
-hry) zatím chybí — viz kapitola 11 hlavního plánu.
+3e) Co je hotové (Etapa 2 — QR platba)
+
+- hospoda si v Nastavení hospody může nepovinně zadat svůj bankovní účet
+  (IBAN) — pole `bank_account` (migrace 0007),
+- pokud je účet vyplněný, host na stránce stolu vidí panel "K zaplacení"
+  s částkou (součet nezaplacených objednávek) a QR kódem ve formátu český
+  standard "QR Platba"/SPD (`SPD*1.0*ACC:...`) — naskenovatelný většinou
+  bankovních appek, žádná platební brána ani API klíč není potřeba,
+- personál na stránce Stoly a QR odkazy vidí u stolu s nezaplacenou útratou
+  částku a tlačítko "Označit jako zaplaceno" — nastaví příznak `paid` u
+  objednávek stolu (migrace 0007), čtení i zápis chrání existující RLS
+  pravidla (`venues_update_manager`, `orders_update_staff`).
+
+Zbytek Etapy 2 (přehled tržeb, hry) zatím chybí — viz kapitola 11 hlavního plánu.
 
 ## 4) Co záměrně chybí (přijde v dalších etapách)
 
-QR platba, přehled tržeb, hry — viz kapitola 11 hlavního plánu (zbytek
+Přehled tržeb, hry — viz kapitola 11 hlavního plánu (zbytek
 Etapy 2 a dál). Podle pravidel pro vývoj (kapitola 13) se nemá programovat
 všechno najednou — tohle je záměrně jen základ, na kterém se dá stavět.
 
