@@ -7,6 +7,7 @@ import { KitchenPage } from './pages/admin/KitchenPage'
 import { RevenuePage } from './pages/admin/RevenuePage'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { TablePage } from './pages/public/TablePage'
+import { GamePage } from './pages/public/GamePage'
 
 export function App() {
   return (
@@ -23,6 +24,7 @@ export function App() {
       </Route>
 
       <Route path="/v/:venueSlug/t/:tableToken" element={<TablePage />} />
+      <Route path="/v/:venueSlug/t/:tableToken/hra" element={<GamePage />} />
 
       <Route path="*" element={<p style={{ padding: 24 }}>Stránka nenalezena.</p>} />
     </Routes>
