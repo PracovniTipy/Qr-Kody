@@ -12,28 +12,37 @@ interface Props {
 }
 
 const EMOJIS = ['🍺', '🍔', '🍟', '🥨', '🍕']
-const GAME_DURATION_MS = 30000
+const LIVES_START = 3
 const BASKET_WIDTH_PERCENT = 18
-const SPAWN_INTERVAL_MS = 900
-const FALL_SPEED = 0.18 // px/ms
+const BASE_SPAWN_INTERVAL_MS = 900
+const MIN_SPAWN_INTERVAL_MS = 350
+const SPAWN_RAMP_MS_PER_SEC = 15 // o kolik ms se zkracuje interval spawnu za každou vteřinu hry
+const BASE_FALL_SPEED = 0.15 // px/ms na začátku
+const MAX_FALL_SPEED = 0.5 // px/ms strop (dosažen cca po 35 s)
+const FALL_SPEED_RAMP_PER_SEC = 0.01 // o kolik px/ms se rychlost pádu zvýší za vteřinu
 
 /**
  * Etapa 4 (masterplán, kapitola 11): samotná hra "Chytání padajících
- * surovin" – čistě klientská mechanika (30 s, táhni košík doleva/doprava).
- * Výsledné skóre validuje a ukládá server (viz GamePage a migrace 0008),
- * tahle komponenta jen odehraje kolo a přes onGameOver nahlásí výsledek.
+ * surovin" – čistě klientská mechanika. Hra je nekonečná a postupně čím
+ * dál těžší (rychlejší pád, kratší interval mezi surovinami) – končí, až
+ * hráč přijde o všechny 3 životy (nechytnutá surovina, co spadne na zem,
+ * stojí jeden život). Výsledné skóre validuje a ukládá server (viz
+ * GamePage a migrace 0008/0009) podle uplynulého času, tahle komponenta
+ * jen odehraje kolo a přes onGameOver nahlásí výsledek.
  */
 export function KosikGame({ onGameOver }: Props) {
   const [basketX, setBasketX] = useState(50)
   const [items, setItems] = useState<FallingItem[]>([])
   const [score, setScore] = useState(0)
-  const [timeLeft, setTimeLeft] = useState(GAME_DURATION_MS)
+  const [lives, setLives] = useState(LIVES_START)
 
   const nextId = useRef(0)
   const areaRef = useRef<HTMLDivElement>(null)
   const basketXRef = useRef(50)
   const scoreRef = useRef(0)
+  const livesRef = useRef(LIVES_START)
   const finishedRef = useRef(false)
+  const startedAtRef = useRef(0)
 
   useEffect(() => {
     basketXRef.current = basketX
@@ -43,22 +52,21 @@ export function KosikGame({ onGameOver }: Props) {
     let raf: number
     let lastSpawn = 0
     let lastTick = performance.now()
+    startedAtRef.current = lastTick
 
     function frame(now: number) {
       const dt = now - lastTick
       lastTick = now
+      const elapsedSec = (now - startedAtRef.current) / 1000
 
-      setTimeLeft((t) => {
-        const next = t - dt
-        if (next <= 0 && !finishedRef.current) {
-          finishedRef.current = true
-          onGameOver(scoreRef.current)
-        }
-        return Math.max(0, next)
-      })
+      const fallSpeed = Math.min(MAX_FALL_SPEED, BASE_FALL_SPEED + FALL_SPEED_RAMP_PER_SEC * elapsedSec)
+      const spawnInterval = Math.max(
+        MIN_SPAWN_INTERVAL_MS,
+        BASE_SPAWN_INTERVAL_MS - SPAWN_RAMP_MS_PER_SEC * elapsedSec,
+      )
 
       if (!finishedRef.current) {
-        if (now - lastSpawn > SPAWN_INTERVAL_MS) {
+        if (now - lastSpawn > spawnInterval) {
           lastSpawn = now
           nextId.current += 1
           setItems((prev) => [
@@ -76,7 +84,7 @@ export function KosikGame({ onGameOver }: Props) {
           const areaHeight = areaRef.current?.clientHeight ?? 400
           const next: FallingItem[] = []
           for (const item of prev) {
-            const newY = item.y + dt * FALL_SPEED
+            const newY = item.y + dt * fallSpeed
             if (newY >= areaHeight - 60) {
               const dx = Math.abs(item.x - basketXRef.current)
               if (dx < BASKET_WIDTH_PERCENT / 2 + 6) {
@@ -84,7 +92,15 @@ export function KosikGame({ onGameOver }: Props) {
                 setScore(scoreRef.current)
                 continue
               }
-              if (newY >= areaHeight) continue
+              if (newY >= areaHeight) {
+                livesRef.current -= 1
+                setLives(livesRef.current)
+                if (livesRef.current <= 0 && !finishedRef.current) {
+                  finishedRef.current = true
+                  onGameOver(scoreRef.current)
+                }
+                continue
+              }
             }
             next.push({ ...item, y: newY })
           }
@@ -113,7 +129,10 @@ export function KosikGame({ onGameOver }: Props) {
     <div className="kosik-game">
       <div className="kosik-hud">
         <span>Skóre: {score}</span>
-        <span>{Math.ceil(timeLeft / 1000)} s</span>
+        <span className="kosik-lives">
+          {'❤️'.repeat(lives)}
+          {'🖤'.repeat(LIVES_START - lives)}
+        </span>
       </div>
 
       <div
@@ -122,6 +141,10 @@ export function KosikGame({ onGameOver }: Props) {
         onPointerDown={handleAreaPointer}
         onPointerMove={(e) => e.buttons === 1 && handleAreaPointer(e)}
       >
+        <div className="kosik-floor" />
+        <div className="kosik-thrower" aria-hidden="true">
+          🧑‍🍳
+        </div>
         {items.map((item) => (
           <span key={item.id} className="kosik-item" style={{ left: `${item.x}%`, top: `${item.y}px` }}>
             {item.emoji}
@@ -132,7 +155,10 @@ export function KosikGame({ onGameOver }: Props) {
         </div>
       </div>
 
-      <p className="kosik-hint">Táhni prstem doleva/doprava a chytej suroviny do košíku.</p>
+      <p className="kosik-hint">
+        Táhni prstem doleva/doprava a chytej suroviny do košíku – hra je čím dál rychlejší. Nechytnutá surovina tě
+        stojí život.
+      </p>
     </div>
   )
 }
