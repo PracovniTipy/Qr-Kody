@@ -662,3 +662,47 @@ button.danger {
   border-bottom: 1px solid #2a2f3a;
   padding-bottom: 4px;
 }
+
+/* --- Etapa 2 (část): QR platba --- */
+
+.payment-panel {
+  background: #171a20;
+  border: 1px solid #2a2f3a;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.payment-panel h2 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+  color: #d4a94e;
+}
+
+.payment-amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 12px;
+}
+
+.payment-qr {
+  width: 180px;
+  height: 180px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.payment-hint {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+  color: #a9a29a;
+}
+
+.unpaid-badge {
+  display: block;
+  font-size: 0.8rem;
+  color: #d4a94e;
+  margin-top: 2px;
+}
