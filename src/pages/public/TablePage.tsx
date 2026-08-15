@@ -5,16 +5,18 @@ import { TableContext } from '../../types/tableContext'
 import { OrderSummary } from '../../types/order'
 import { MenuList } from '../../components/MenuList'
 import { OrdersList } from '../../components/OrdersList'
+import { PaymentPanel } from '../../components/PaymentPanel'
 
 /**
  * Veřejná stránka stolu: app.cz/v/:venueSlug/t/:tableToken
  * Hospodu i stůl vždy potvrzuje server (DB funkce get_table_context), nikdy jen klient –
  * viz podmínka dokončení MVP "QR kód vždy otevře správnou hospodu a správný stůl".
  *
- * Etapa 2 (část): přidán košík a odeslání objednávky. Objednávka vzniká výhradně
+ * Etapa 2: přidán košík a odeslání objednávky. Objednávka vzniká výhradně
  * přes bezpečnou RPC funkci submit_order, která si sama ověří platnost tokenu stolu
  * (stejný vzor jako get_table_context) – klient nikdy nezapisuje do orders/order_items
- * přímo. Kuchyňská obrazovka a QR platba přijdou v dalších částech Etapy 2.
+ * přímo. Kuchyňská obrazovka (KitchenPage) a QR platba (PaymentPanel) jsou taky
+ * hotové – zbývá přehled tržeb a hry, viz kapitola 11 hlavního plánu.
  */
 export function TablePage() {
   const { venueSlug, tableToken } = useParams<{ venueSlug: string; tableToken: string }>()
@@ -89,6 +91,10 @@ export function TablePage() {
   const cartTotal = cartLines.reduce((sum, line) => sum + line.item.price_czk * line.quantity, 0)
   const cartCount = cartLines.reduce((sum, line) => sum + line.quantity, 0)
 
+  const unpaidTotal = orders
+    .filter((o) => o.status !== 'zrusena' && !o.paid)
+    .reduce((sum, o) => sum + o.items.reduce((s, it) => s + it.price_czk * it.quantity, 0), 0)
+
   async function handleSubmitOrder() {
     if (!tableToken || cartLines.length === 0) return
 
@@ -143,6 +149,13 @@ export function TablePage() {
       </header>
 
       <OrdersList orders={orders} />
+
+      <PaymentPanel
+        amount={unpaidTotal}
+        bankAccount={context.venue.bank_account}
+        venueName={context.venue.name}
+        tableLabel={context.table.label}
+      />
 
       <MenuList categories={context.menu} quantities={quantities} onQuantityChange={setQuantity} />
 
