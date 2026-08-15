@@ -5,6 +5,7 @@ export interface VenueRow {
   slug: string
   name: string
   is_active: boolean
+  bank_account: string | null
 }
 
 export interface TableRow {
