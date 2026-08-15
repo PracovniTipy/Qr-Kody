@@ -706,3 +706,69 @@ button.danger {
   color: #d4a94e;
   margin-top: 2px;
 }
+
+/* --- Etapa 2 (část): přehled tržeb --- */
+
+.revenue-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.revenue-page header {
+  margin-bottom: 16px;
+}
+
+.header-links {
+  display: flex;
+  gap: 8px;
+}
+
+.revenue-summary {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.revenue-card {
+  background: #171a20;
+  border: 1px solid #2a2f3a;
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.revenue-card-label {
+  font-size: 0.8rem;
+  color: #a9a29a;
+}
+
+.revenue-card-value {
+  font-size: 1.6rem;
+  color: #d4a94e;
+}
+
+.revenue-card-hint {
+  font-size: 0.8rem;
+  color: #a9a29a;
+}
+
+.revenue-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.revenue-table th,
+.revenue-table td {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid #2a2f3a;
+}
+
+.revenue-table th {
+  color: #a9a29a;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
