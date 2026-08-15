@@ -35,6 +35,7 @@ export function KosikGame({ onGameOver }: Props) {
   const [items, setItems] = useState<FallingItem[]>([])
   const [score, setScore] = useState(0)
   const [lives, setLives] = useState(LIVES_START)
+  const [throwerX, setThrowerX] = useState(50)
 
   const nextId = useRef(0)
   const areaRef = useRef<HTMLDivElement>(null)
@@ -69,11 +70,13 @@ export function KosikGame({ onGameOver }: Props) {
         if (now - lastSpawn > spawnInterval) {
           lastSpawn = now
           nextId.current += 1
+          const spawnX = 10 + Math.random() * 80
+          setThrowerX(spawnX)
           setItems((prev) => [
             ...prev,
             {
               id: nextId.current,
-              x: 10 + Math.random() * 80,
+              x: spawnX,
               y: -10,
               emoji: EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
             },
@@ -142,7 +145,7 @@ export function KosikGame({ onGameOver }: Props) {
         onPointerMove={(e) => e.buttons === 1 && handleAreaPointer(e)}
       >
         <div className="kosik-floor" />
-        <div className="kosik-thrower" aria-hidden="true">
+        <div className="kosik-thrower" style={{ left: `${throwerX}%` }} aria-hidden="true">
           🧑‍🍳
         </div>
         {items.map((item) => (
