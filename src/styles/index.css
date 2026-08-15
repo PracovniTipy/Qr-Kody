@@ -911,3 +911,42 @@ button.danger {
   color: #d4a94e;
   font-weight: 600;
 }
+
+/* --- Etapa 4 (úprava): pozadí, kuchař nahoře a životy --- */
+
+.kosik-area {
+  background: linear-gradient(180deg, #232030 0%, #1c1f26 55%, #14171c 100%);
+}
+
+.kosik-lives {
+  font-size: 1.05rem;
+  letter-spacing: 2px;
+}
+
+.kosik-floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 46px;
+  background: linear-gradient(180deg, rgba(212, 169, 78, 0.15), rgba(212, 169, 78, 0.05));
+  border-top: 2px solid #d4a94e;
+}
+
+.kosik-thrower {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  font-size: 2.2rem;
+  z-index: 2;
+  animation: kosik-throw 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes kosik-throw {
+  from {
+    transform: translateX(-50%) rotate(-8deg);
+  }
+  to {
+    transform: translateX(-50%) rotate(8deg);
+  }
+}
