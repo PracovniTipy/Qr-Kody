@@ -91,6 +91,9 @@ export function AdminVenuePage() {
           </Link>
           <h1>{venue.name}</h1>
         </div>
+        <Link to={`/admin/hospoda/${venue.id}/kuchyne`} className="kitchen-link">
+          Kuchyň →
+        </Link>
       </header>
 
       <VenueSettingsForm venue={venue} onSaved={setVenue} />
