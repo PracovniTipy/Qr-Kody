@@ -8,14 +8,16 @@ interface Props {
 }
 
 /**
- * Základní údaje hospody: název, slug (součást veřejné URL /v/:slug/t/:token)
- * a přepínač aktivní/neaktivní. Editovat smí jen MAJITEL/MANAZER – vynucuje
- * to RLS pravidlo venues_update_manager (viz migrace 0002).
+ * Základní údaje hospody: název, slug (součást veřejné URL /v/:slug/t/:token),
+ * přepínač aktivní/neaktivní a bankovní účet pro QR platbu (Etapa 2, viz
+ * PaymentPanel). Editovat smí jen MAJITEL/MANAZER – vynucuje to RLS pravidlo
+ * venues_update_manager (viz migrace 0002).
  */
 export function VenueSettingsForm({ venue, onSaved }: Props) {
   const [name, setName] = useState(venue.name)
   const [slug, setSlug] = useState(venue.slug)
   const [isActive, setIsActive] = useState(venue.is_active)
+  const [bankAccount, setBankAccount] = useState(venue.bank_account ?? '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [savedMsg, setSavedMsg] = useState(false)
@@ -28,7 +30,7 @@ export function VenueSettingsForm({ venue, onSaved }: Props) {
 
     const { data, error: updateError } = await supabase
       .from('venues')
-      .update({ name, slug, is_active: isActive })
+      .update({ name, slug, is_active: isActive, bank_account: bankAccount.trim() || null })
       .eq('id', venue.id)
       .select()
       .single()
@@ -73,6 +75,14 @@ export function VenueSettingsForm({ venue, onSaved }: Props) {
         />
         Hospoda je aktivní (jinak QR kódy stolů přestanou fungovat)
       </label>
+
+      <label htmlFor="venue-bank-account">IBAN (pro QR platbu hostům, nepovinné)</label>
+      <input
+        id="venue-bank-account"
+        value={bankAccount}
+        onChange={(e) => setBankAccount(e.target.value)}
+        placeholder="CZ6508000000192000145399"
+      />
 
       {error && <p className="error">{error}</p>}
       {savedMsg && !error && <p className="success">Uloženo.</p>}
