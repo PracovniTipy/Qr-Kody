@@ -12,8 +12,8 @@ naskenování/obnovu QR tokenu stolu a import menu z PDF/fotky přes AI
 (Claude vision).
 
 Etapa 2 (zatím část podle kapitoly 11 hlavního plánu) přidává košík,
-odeslání objednávky ze stránky stolu, kuchyňskou obrazovku pro personál a
-QR platbu.
+odeslání objednávky ze stránky stolu, kuchyňskou obrazovku pro personál, QR
+platbu a přehled tržeb.
 
 > Poznámka: kód je hotový a připravený, ale tenhle sandbox nemá přístup k npm
 > registru, takže tady nešlo spustit `npm install` ani ověřit build. Než to
@@ -120,11 +120,21 @@ zkontrolovat/upravit a teprve pak publikovat do menu hospody, viz kapitola
   objednávek stolu (migrace 0007), čtení i zápis chrání existující RLS
   pravidla (`venues_update_manager`, `orders_update_staff`).
 
-Zbytek Etapy 2 (přehled tržeb, hry) zatím chybí — viz kapitola 11 hlavního plánu.
+3f) Co je hotové (Etapa 2 — přehled tržeb)
+
+- `/admin/hospoda/:venueId/trzby` — přehled tržeb pro personál/majitele:
+  dnešní tržby a tržby za posledních 30 dní (souhrnné karty) a tabulka
+  tržeb/počtu objednávek po dnech,
+- počítá se ze zaplacených objednávek (`orders.paid = true`, viz QR platba
+  výše) — čtení jde přímo přes Supabase klienta, chrání to stejné RLS
+  pravidlo `orders_select_staff` jako kuchyňská obrazovka (migrace 0005),
+  žádná nová migrace ani RPC funkce tu nebyla potřeba.
+
+Zbytek Etapy 2 (hry) zatím chybí — viz kapitola 11 hlavního plánu.
 
 ## 4) Co záměrně chybí (přijde v dalších etapách)
 
-Přehled tržeb, hry — viz kapitola 11 hlavního plánu (zbytek
+Hry — viz kapitola 11 hlavního plánu (zbytek
 Etapy 2 a dál). Podle pravidel pro vývoj (kapitola 13) se nemá programovat
 všechno najednou — tohle je záměrně jen základ, na kterém se dá stavět.
 
