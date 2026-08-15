@@ -138,16 +138,20 @@ zkontrolovat/upravit a teprve pak publikovat do menu hospody, viz kapitola
 ## 3g) Co je hotové (Etapa 4 — arkádová hra)
 
 - `/v/:venueSlug/t/:tableToken/hra` — první arkádová hra "Chytání padajících
-  surovin" (30 s, tažení košíku, chytání padajících surovin), přístupná
-  odkazem "🎮 Hrát" ze stránky stolu,
+  surovin" — tažení košíku, chytání padajících surovin, přístupná odkazem
+  "🎮 Hrát" ze stránky stolu. Hra je nekonečná a čím dál rychlejší/těžší
+  (rychlost pádu i interval mezi surovinami se postupně zvyšují), končí až
+  při ztrátě všech 3 životů (nechytnutá surovina spadne na zem),
 - skóre a žebříček jdou přes bezpečné RPC funkce (`start_game_session`,
   `submit_game_score`, `get_game_leaderboard`, migrace 0008) — stejný vzor
   jako u objednávek: klient nikdy nezapisuje do `game_sessions`/`game_scores`
   přímo (RLS je zapnuté, ale bez policy pro anon/authenticated),
-- základní ochrana proti podvádění (kapitola 9.1): server hlídá, že mezi
-  začátkem a odesláním skóre uplynul realistický čas (20–600 s), že skóre
-  nepřesahuje teoretické maximum pro danou hru a že jedna hraná session jde
-  odeslat jen jednou — ověřeno i ručně přímým voláním RPC (moc rychlé
+- základní ochrana proti podvádění (kapitola 9.1, migrace 0009): protože
+  je hra nekonečná, server nemá pevný časový limit ani pevný strop skóre —
+  hlídá jen, že mezi začátkem a odesláním skóre uplynul realistický čas
+  (min. 1,5 s, max. 30 minut) a že skóre nepřesahuje teoretické maximum
+  odvozené od uplynulého času (s velkorysou rezervou). Jedna hraná session
+  jde odeslat jen jednou — ověřeno i ručně přímým voláním RPC (moc rychlé
   odeslání, přehnané skóre i opakované odeslání stejné session server
   odmítne),
 - hráčské účty zatím nejsou (kapitola 9, Etapa 9) — žebříček je anonymní,
