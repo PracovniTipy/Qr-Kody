@@ -71,7 +71,20 @@ export function MenuImportWizard({ venueId, categories, items, onCategoriesChang
       })
 
       if (fnError) {
-        throw new Error(fnError.message)
+        // Supabase klient dá do fnError.message jen obecné "non-2xx status code" –
+        // skutečnou (česky srozumitelnou) chybu vracíme v JSON těle odpovědi, tak ji
+        // odsud zkusíme vytáhnout, než sáhneme po obecné hlášce jako záložní variantě.
+        let message = fnError.message
+        const context = (fnError as { context?: Response }).context
+        if (context && typeof context.json === 'function') {
+          try {
+            const body = await context.clone().json()
+            if (body?.error) message = body.error
+          } catch {
+            // tělo odpovědi nejde přečíst jako JSON – necháme obecnou hlášku
+          }
+        }
+        throw new Error(message)
       }
       if (data?.error) {
         throw new Error(data.error)
