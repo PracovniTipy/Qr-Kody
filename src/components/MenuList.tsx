@@ -1,6 +1,12 @@
 import { MenuCategory } from '../types/tableContext'
 
-export function MenuList({ categories }: { categories: MenuCategory[] }) {
+interface MenuListProps {
+  categories: MenuCategory[]
+  quantities?: Record<string, number>
+  onQuantityChange?: (itemId: string, quantity: number) => void
+}
+
+export function MenuList({ categories, quantities, onQuantityChange }: MenuListProps) {
   if (categories.length === 0) {
     return <p>Menu zatím není naplněné.</p>
   }
@@ -17,17 +23,37 @@ export function MenuList({ categories }: { categories: MenuCategory[] }) {
               {category.items
                 .filter((item) => item.is_available)
                 .sort((a, b) => a.sort_order - b.sort_order)
-                .map((item) => (
-                  <li key={item.id} className="menu-item">
-                    <div>
-                      <span className="menu-item-name">{item.name}</span>
-                      {item.description && (
-                        <p className="menu-item-desc">{item.description}</p>
-                      )}
-                    </div>
-                    <span className="menu-item-price">{item.price_czk} Kč</span>
-                  </li>
-                ))}
+                .map((item) => {
+                  const quantity = quantities?.[item.id] ?? 0
+                  return (
+                    <li key={item.id} className="menu-item">
+                      <div>
+                        <span className="menu-item-name">{item.name}</span>
+                        {item.description && (
+                          <p className="menu-item-desc">{item.description}</p>
+                        )}
+                      </div>
+                      <div className="menu-item-right">
+                        <span className="menu-item-price">{item.price_czk} Kč</span>
+                        {onQuantityChange && (
+                          <div className="quantity-stepper">
+                            <button
+                              type="button"
+                              onClick={() => onQuantityChange(item.id, Math.max(0, quantity - 1))}
+                              disabled={quantity === 0}
+                            >
+                              −
+                            </button>
+                            <span>{quantity}</span>
+                            <button type="button" onClick={() => onQuantityChange(item.id, quantity + 1)}>
+                              +
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </li>
+                  )
+                })}
             </ul>
           </section>
         ))}
