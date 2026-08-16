@@ -186,6 +186,7 @@ export function RunnerGame({ onGameOver }: Props) {
       </div>
 
       <div className="runner-area" ref={areaRef} onPointerDown={handleJump}>
+        <div className="pub-dust" />
         {!started && <p className="runner-start-hint">Ťukni pro skok</p>}
 
         <span className="runner-decor" style={{ left: '6%', top: '10%' }}>
