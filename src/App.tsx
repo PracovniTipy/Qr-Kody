@@ -9,6 +9,7 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { TablePage } from './pages/public/TablePage'
 import { GamePage } from './pages/public/GamePage'
 import { FlappyGamePage } from './pages/public/FlappyGamePage'
+import { RunnerGamePage } from './pages/public/RunnerGamePage'
 
 export function App() {
   return (
@@ -27,6 +28,7 @@ export function App() {
       <Route path="/v/:venueSlug/t/:tableToken" element={<TablePage />} />
       <Route path="/v/:venueSlug/t/:tableToken/hra" element={<GamePage />} />
       <Route path="/v/:venueSlug/t/:tableToken/hra-let" element={<FlappyGamePage />} />
+      <Route path="/v/:venueSlug/t/:tableToken/hra-beh" element={<RunnerGamePage />} />
 
       <Route path="*" element={<p style={{ padding: 24 }}>Stránka nenalezena.</p>} />
     </Routes>
