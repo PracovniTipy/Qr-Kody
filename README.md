@@ -15,9 +15,10 @@ Etapa 2 (podle kapitoly 11 hlavního plánu) přidává košík, odeslání
 objednávky ze stránky stolu, kuchyňskou obrazovku pro personál, QR platbu a
 přehled tržeb.
 
-Etapa 4 (zatím jen část) přidává dvě arkádové hry pro hosty u stolu —
-"Chytání padajících surovin" a "Let mezi sudy" (flappy-bird styl) — se
-skóre, žebříčkem hospody a základní ochranou proti podvádění. Zbylé hry
+Etapa 4 (zatím jen část) přidává tři arkádové hry pro hosty u stolu —
+"Chytání padajících surovin", "Let mezi sudy" (flappy-bird styl) a
+"Hospodský běh" (endless runner) — se skóre, žebříčkem hospody a
+základní ochranou proti podvádění. Zbylé hry
 z masterplánu (kapitola 7) na řadu přijdou později, viz kapitola 11.
 
 > Poznámka: kód je hotový a připravený, ale tenhle sandbox nemá přístup k npm
@@ -143,31 +144,39 @@ zkontrolovat/upravit a teprve pak publikovat do menu hospody, viz kapitola
   (rychlost pádu i interval mezi surovinami se postupně zvyšují), končí až
   při ztrátě všech 3 životů (nechytnutá surovina spadne na zem),
 - `/v/:venueSlug/t/:tableToken/hra-let` — druhá arkádová hra "Let mezi sudy"
-  (flappy-bird styl) — ťuknutím pták "plácá křídly" a musí proletět mezerami
-  mezi sudy, přístupná odkazem "🐦 Let mezi sudy" ze stránky stolu. I tahle
-  hra je nekonečná a čím dál těžší (rychlejší sudy, kratší interval mezi
-  nimi, užší mezera), končí hned při prvním nárazu,
-- obě hry sdílí stejnou serverovou kostru: skóre a žebříček jdou přes
-  bezpečné RPC funkce (`start_game_session`, `submit_game_score`,
+  (flappy-bird styl, hospodský vizuál) — ťuknutím půllitr piva "poskočí" a
+  musí proletět mezerami mezi sudy naskládanými v hospodě, přístupná
+  odkazem "🍺 Let mezi sudy" ze stránky stolu. Hra je nekonečná a čím dál
+  těžší (rychlejší sudy, kratší interval mezi nimi, užší mezera), končí
+  hned při prvním nárazu,
+- `/v/:venueSlug/t/:tableToken/hra-beh` — třetí arkádová hra "Hospodský
+  běh" (endless runner, hospodský vizuál) — postava běží pořád dopředu
+  hospodou a ťuknutím přeskakuje překážky (židle, sudy, rozlité pivo),
+  přístupná odkazem "🏃 Hospodský běh" ze stránky stolu. I tahle hra je
+  nekonečná a čím dál těžší (rychlejší překážky, kratší interval mezi
+  nimi), končí hned při prvním nárazu,
+- všechny tři hry sdílí stejnou serverovou kostru: skóre a žebříček jdou
+  přes bezpečné RPC funkce (`start_game_session`, `submit_game_score`,
   `get_game_leaderboard`, migrace 0008) — stejný vzor jako u objednávek:
   klient nikdy nezapisuje do `game_sessions`/`game_scores` přímo (RLS je
   zapnuté, ale bez policy pro anon/authenticated),
-- základní ochrana proti podvádění (kapitola 9.1, migrace 0009–0010):
-  protože jsou obě hry nekonečné, server nemá pevný časový limit ani pevný
-  strop skóre — hlídá jen, že mezi začátkem a odesláním skóre uplynul
-  realistický čas (u "Chytání padajících surovin" min. 1,5 s, u "Let mezi
-  sudy" min. 0,2 s, u obou max. 30 minut) a že skóre nepřesahuje teoretické
-  maximum odvozené od uplynulého času podle dané hry (s velkorysou
-  rezervou). Jedna hraná session jde odeslat jen jednou — ověřeno i ručně
-  přímým voláním RPC (moc rychlé odeslání, přehnané skóre i opakované
-  odeslání stejné session server odmítne),
+- základní ochrana proti podvádění (kapitola 9.1, migrace 0009–0011):
+  protože jsou všechny tři hry nekonečné, server nemá pevný časový limit
+  ani pevný strop skóre — hlídá jen, že mezi začátkem a odesláním skóre
+  uplynul realistický čas (u "Chytání padajících surovin" min. 1,5 s, u
+  "Let mezi sudy" min. 0,2 s, u "Hospodského běhu" min. 0,3 s, u všech
+  max. 30 minut) a že skóre nepřesahuje teoretické maximum odvozené od
+  uplynulého času podle dané hry (s velkorysou rezervou). Jedna hraná
+  session jde odeslat jen jednou — ověřeno i ručně přímým voláním RPC
+  (moc rychlé odeslání, přehnané skóre i opakované odeslání stejné session
+  server odmítne),
 - hráčské účty zatím nejsou (kapitola 9, Etapa 9) — žebříček je anonymní,
   jen s dobrovolnou přezdívkou u skóre (max. 20 znaků).
 
 ## 4) Co záměrně chybí (přijde v dalších etapách)
 
-Masterplán (kapitola 7) počítá s dalšími třemi hrami se skóre (hospodský
-běh, skákání nahoru, "breakout"/arkanoid) a pěti stolními
+Masterplán (kapitola 7) počítá s dalšími dvěma hrami se skóre (skákání
+nahoru, "breakout"/arkanoid) a pěti stolními
 hrami bez skóre (šachy, prší, dáma, flaška, poker) — podle kapitoly 11 na
 řadu přijdou až po MVP, ne najednou. Dál chybí i vše ostatní z masterplánu:
 partnerský program, turnaje, hráčské účty, vícejazyčné menu, hodnocení,
