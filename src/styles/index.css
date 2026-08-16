@@ -954,3 +954,67 @@ button.danger {
 .kosik-thrower {
   transition: left 0.25s ease-out;
 }
+
+.flappy-game {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.flappy-hud {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+}
+
+.flappy-area {
+  position: relative;
+  overflow: hidden;
+  height: 420px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #7ec8e3 0%, #bfe6f0 60%, #e8d9a0 100%);
+  touch-action: none;
+  cursor: pointer;
+}
+
+.flappy-pipe {
+  position: absolute;
+  background: linear-gradient(90deg, #8a5a2b 0%, #c68a44 50%, #8a5a2b 100%);
+  border: 2px solid #5c3a1a;
+  border-radius: 4px;
+}
+
+.flappy-pipe-top {
+  top: 0;
+}
+
+.flappy-pipe-bottom {
+  bottom: 0;
+}
+
+.flappy-bird {
+  position: absolute;
+  font-size: 28px;
+  line-height: 1;
+  will-change: transform, top;
+}
+
+.flappy-start-hint {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 6px 12px;
+  background: rgba(15, 17, 21, 0.55);
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 1;
+}
+
+.flappy-hint {
+  margin: 0;
+  font-size: 13px;
+  color: #b8b0a3;
+  text-align: center;
+}
