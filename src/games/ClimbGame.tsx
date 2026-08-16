@@ -15,34 +15,44 @@ interface Props {
 const PLAYER_SIZE = 32
 const PLAYER_X_SPEED = 0.09 // px/ms vodorovný posun
 const GRAVITY = 0.0022
-const BOUNCE_VELOCITY = -0.62
+const BOUNCE_VELOCITY = -0.72
 const MAX_FALL_VELOCITY = 0.9
 const LANDING_ZONE = 50 // tolerance pro dopad na plošinu (px)
-const BASE_SCROLL_SPEED = 0.05 // px/ms na začátku
-const MAX_SCROLL_SPEED = 0.16 // px/ms strop (dosažen cca po 50 s)
-const SCROLL_SPEED_RAMP_PER_SEC = 0.0022
-const BASE_PLATFORM_GAP = 90
-const MAX_PLATFORM_GAP = 150
-const PLATFORM_GAP_RAMP_PER_SEC = 1.2
-const BASE_PLATFORM_WIDTH = 72
+const CAMERA_THRESHOLD_RATIO = 0.42 // nad touto linkou (odshora) se misto hrace posouva svet dolu
+const BASE_PLATFORM_GAP = 80
+const MAX_PLATFORM_GAP = 140
+const PLATFORM_GAP_RAMP_PER_SEC = 1.1
+const BASE_PLATFORM_WIDTH = 74
 const MIN_PLATFORM_WIDTH = 46
-const PLATFORM_WIDTH_SHRINK_PER_SEC = 0.5
-const SCORE_UNIT_PX = 160
+const PLATFORM_WIDTH_SHRINK_PER_SEC = 0.4
+const SCORE_UNIT_PX = 20
+const SPAWN_AHEAD_MARGIN = 40 // kolik px nad hornim okrajem hriste musi mit zebrik plosin naskok
+
+function spawnPlatform(id: number, topY: number, gap: number, width: number, areaW: number): Platform {
+  const type: Platform['type'] = Math.random() < 0.4 ? 'sud' : 'stul'
+  const platformWidth = type === 'sud' ? Math.max(36, width - 20) : width
+  const jitter = (Math.random() - 0.5) * Math.min(24, gap * 0.3)
+  const x = Math.random() * Math.max(0, areaW - platformWidth)
+  return { id, x, y: topY - gap + jitter, width: platformWidth, type }
+}
 
 /**
  * Etapa 4 (masterplán, kapitola 11): čtvrtá arkádová hra pro hosty u stolu –
- * „Skákání nahoru“ (doodle-jump styl, hospodský vizuál). Host automaticky
- * poskakuje mezi stoly a sudy, které se řadí čím dál výš – ťuknutím se
- * otočí vodorovný směr, aby dopadl na další plošinu. Kamera (plošiny) se
- * posouvá dolů čím dál rychleji a plošiny jsou čím dál řidší a užší. Hra
+ * „Skákání nahoru“ (doodle-jump styl, kovbojský vizuál). Host automaticky
+ * poskakuje mezi prkny a sudy, které se řadí čím dál výš – ťuknutím se
+ * otočí vodorovný směr, aby dopadl na další plošinu. Kamera je opravdová:
+ * dokud hráč skáče pod prahovou linkou (skáče „na místě“), obraz stojí, a
+ * teprve jakmile by vyskočil nad ni, místo toho se posune celý svět
+ * (plošiny) o stejný kus dolů – takže se obraz hýbe jen nahoru, přesně
+ * podle toho, jak vysoko hráč doskočí. Plošiny se předgenerují do zásoby
+ * a průběžně doplňují nad hřištěm, aby vždycky bylo na co skákat. Hra
  * končí, jakmile hráč propadne pod spodní okraj hřiště. Server
  * (submit_game_score, migrace 0012) validuje reálnost skóre podle
  * uplynulého času, tahle komponenta jen odehraje kolo a přes onGameOver
- * nahlásí výsledek. Vizuál (kapitola 11, doladění po spuštění MVP): nočně
- * osvětlená hospoda s trámy a girlandou světýlek pod stropem, poletujícím
- * prachem/jiskrami na pozadí a plošinami se stínem, leskem a čepovaným
- * pivem navrch – hráč (tanečník) má pod nohama teplou záři a jemně se
- * natáčí do rytmu.
+ * nahlásí výsledek. Vizuál (přeladěno na kovbojské téma): soumrak nad
+ * kaňonem – fialovorůžové nebe přecházející do oranžova, siluety hor a
+ * kaktusů na obzoru, poletující prach na pozadí a kovboj, kterému pod
+ * nohama září teplá záře a jemně se natáčí do rytmu skoků.
  */
 export function ClimbGame({ onGameOver }: Props) {
   const [playerX, setPlayerX] = useState(0)
@@ -57,8 +67,8 @@ export function ClimbGame({ onGameOver }: Props) {
   const playerYRef = useRef(0)
   const velocityRef = useRef(0)
   const directionRef = useRef<1 | -1>(1)
+  const platformsRef = useRef<Platform[]>([])
   const climbedRef = useRef(0)
-  const nextSpawnAtRef = useRef(0)
   const scoreRef = useRef(0)
   const finishedRef = useRef(false)
   const startedAtRef = useRef(0)
@@ -79,16 +89,28 @@ export function ClimbGame({ onGameOver }: Props) {
     setPlayerX(initialX)
     setPlayerY(initialY)
 
+    // Pregenerovany zebrik plosin - od prvni plosiny hned pod hracem az
+    // notny kus nad horni okraj hriste, at je vzdy hned na co skakat (ne
+    // jen na tu prvni, jak tomu bylo predtim).
     nextId.current += 1
-    const firstPlatform: Platform = {
-      id: nextId.current,
-      x: Math.max(0, initialX - 10),
-      y: initialY + PLAYER_SIZE + 4,
-      width: BASE_PLATFORM_WIDTH,
-      type: 'stul',
+    const initialPlatforms: Platform[] = [
+      {
+        id: nextId.current,
+        x: Math.max(0, initialX - 10),
+        y: initialY + PLAYER_SIZE + 4,
+        width: BASE_PLATFORM_WIDTH,
+        type: 'stul',
+      },
+    ]
+    let topY = initialPlatforms[0].y
+    while (topY > -areaHeight * 1.5) {
+      nextId.current += 1
+      const p = spawnPlatform(nextId.current, topY, BASE_PLATFORM_GAP, BASE_PLATFORM_WIDTH, areaWidth)
+      initialPlatforms.push(p)
+      topY = p.y
     }
-    setPlatforms([firstPlatform])
-    nextSpawnAtRef.current = BASE_PLATFORM_GAP
+    platformsRef.current = initialPlatforms
+    setPlatforms(initialPlatforms)
 
     function frame(now: number) {
       const dt = Math.min(now - lastTick, 48) // ochrana proti skokům po přepnutí tabu
@@ -97,8 +119,8 @@ export function ClimbGame({ onGameOver }: Props) {
       const areaEl = areaRef.current
       const areaH = areaEl?.clientHeight ?? 420
       const areaW = areaEl?.clientWidth ?? 300
+      const cameraThreshold = areaH * CAMERA_THRESHOLD_RATIO
 
-      const scrollSpeed = Math.min(MAX_SCROLL_SPEED, BASE_SCROLL_SPEED + SCROLL_SPEED_RAMP_PER_SEC * elapsedSec)
       const platformGap = Math.min(MAX_PLATFORM_GAP, BASE_PLATFORM_GAP + PLATFORM_GAP_RAMP_PER_SEC * elapsedSec)
       const platformWidth = Math.max(MIN_PLATFORM_WIDTH, BASE_PLATFORM_WIDTH - PLATFORM_WIDTH_SHRINK_PER_SEC * elapsedSec)
 
@@ -115,20 +137,22 @@ export function ClimbGame({ onGameOver }: Props) {
           directionRef.current = -1
         }
 
-        climbedRef.current += scrollSpeed * dt
-        const newScore = Math.floor(climbedRef.current / SCORE_UNIT_PX)
-        if (newScore !== scoreRef.current) {
-          scoreRef.current = newScore
-          setScore(newScore)
+        // Kamera: hrac smi skakat volne, dokud je pod hranici. Jakmile by
+        // vyskocil vys, misto toho ho na hranici "podrzime" a o stejny kus
+        // posuneme cely svet (plosiny) dolu - tim vznika iluze stoupani.
+        let scrollDelta = 0
+        if (playerYRef.current < cameraThreshold) {
+          scrollDelta = cameraThreshold - playerYRef.current
+          playerYRef.current = cameraThreshold
         }
 
-        if (climbedRef.current >= nextSpawnAtRef.current) {
-          nextSpawnAtRef.current += platformGap
-          nextId.current += 1
-          const type: Platform['type'] = Math.random() < 0.5 ? 'sud' : 'stul'
-          const width = type === 'sud' ? Math.max(36, platformWidth - 20) : platformWidth
-          const x = Math.random() * Math.max(0, areaW - width)
-          setPlatforms((prev) => [...prev, { id: nextId.current, x, y: -20, width, type }])
+        if (scrollDelta > 0) {
+          climbedRef.current += scrollDelta
+          const newScore = Math.floor(climbedRef.current / SCORE_UNIT_PX)
+          if (newScore !== scoreRef.current) {
+            scoreRef.current = newScore
+            setScore(newScore)
+          }
         }
 
         const playerLeft = playerXRef.current
@@ -136,24 +160,36 @@ export function ClimbGame({ onGameOver }: Props) {
         const playerBottom = playerYRef.current + PLAYER_SIZE
         const falling = velocityRef.current > 0
 
-        setPlatforms((prev) => {
-          const next: Platform[] = []
-          for (const platform of prev) {
-            const newY = platform.y + scrollSpeed * dt
-            if (newY > areaH) continue
+        const shifted: Platform[] = []
+        for (const platform of platformsRef.current) {
+          const newY = platform.y + scrollDelta
+          if (newY > areaH) continue // scrollnula se pod spodni okraj - zahodit
 
-            if (falling) {
-              const overlapsX = playerRight > platform.x && playerLeft < platform.x + platform.width
-              const inLandingZone = playerBottom >= newY - 2 && playerBottom <= newY + LANDING_ZONE
-              if (overlapsX && inLandingZone) {
-                velocityRef.current = BOUNCE_VELOCITY
-              }
+          if (falling) {
+            const overlapsX = playerRight > platform.x && playerLeft < platform.x + platform.width
+            const inLandingZone = playerBottom >= newY - 2 && playerBottom <= newY + LANDING_ZONE
+            if (overlapsX && inLandingZone) {
+              velocityRef.current = BOUNCE_VELOCITY
             }
-
-            next.push({ ...platform, y: newY })
           }
-          return next
-        })
+
+          shifted.push({ ...platform, y: newY })
+        }
+
+        // Doplnit zebrik nahore, at tam vzdy je dost naskoku nad hristem
+        // (ne jen "casem", ale podle skutecne naskakane vysky).
+        let topY = shifted.length ? Math.min(...shifted.map((p) => p.y)) : areaH - 90
+        let guard = 0
+        while (topY > -SPAWN_AHEAD_MARGIN - platformGap && guard < 12) {
+          nextId.current += 1
+          const p = spawnPlatform(nextId.current, topY, platformGap, platformWidth, areaW)
+          shifted.push(p)
+          topY = p.y
+          guard += 1
+        }
+
+        platformsRef.current = shifted
+        setPlatforms(shifted)
 
         if (playerYRef.current > areaH) {
           if (!finishedRef.current) {
@@ -190,7 +226,7 @@ export function ClimbGame({ onGameOver }: Props) {
   return (
     <div className="climb-game">
       <div className="climb-hud">
-        <span>🕺 Skóre: {score}</span>
+        <span>🤠 Skóre: {score}</span>
       </div>
 
       <div className="climb-area" ref={areaRef} onPointerDown={handleTap}>
@@ -199,22 +235,22 @@ export function ClimbGame({ onGameOver }: Props) {
         {!started && <p className="climb-start-hint">Ťukni pro start</p>}
 
         <span className="climb-decor" style={{ left: '6%', top: '10%', animationDelay: '0s' }}>
-          🍷
+          🌵
         </span>
         <span className="climb-decor" style={{ left: '88%', top: '8%', animationDelay: '0.6s' }}>
-          🌭
+          🐎
         </span>
         <span className="climb-decor" style={{ left: '18%', top: '32%', animationDelay: '1.2s' }}>
-          🎵
+          ⭐
         </span>
         <span className="climb-decor" style={{ left: '75%', top: '46%', animationDelay: '2s' }}>
-          ✨
+          🔥
         </span>
         <span className="climb-decor" style={{ left: '10%', top: '64%', animationDelay: '0.9s' }}>
-          🏮
+          🪶
         </span>
         <span className="climb-decor" style={{ left: '82%', top: '72%', animationDelay: '2.6s' }}>
-          🎵
+          🌵
         </span>
 
         {platforms.map((platform) =>
@@ -245,11 +281,13 @@ export function ClimbGame({ onGameOver }: Props) {
           style={{ left: `${playerX + PLAYER_SIZE / 2}px`, top: `${playerY + PLAYER_SIZE}px` }}
         />
         <span className="climb-player" style={{ left: `${playerX}px`, top: `${playerY}px` }}>
-          🕺
+          🤠
         </span>
       </div>
 
-      <p className="climb-hint">Ťukni pro start, pak ťukáním otáčej směr a chytej stoly i sudy – čím dál výš!</p>
+      <p className="climb-hint">
+        Ťukni pro start, pak ťukáním otáčej směr a skákej po prknech i sudech, kovboji – čím dál výš!
+      </p>
     </div>
   )
 }
