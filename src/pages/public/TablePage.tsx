@@ -154,7 +154,7 @@ export function TablePage() {
           🥕 Chytání surovin
         </Link>
         <Link to={`/v/${venueSlug}/t/${tableToken}/hra-let`} className="games-link">
-          🐦 Let mezi sudy
+          🍺 Let mezi sudy
         </Link>
       </div>
 
