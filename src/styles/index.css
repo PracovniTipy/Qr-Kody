@@ -1516,15 +1516,57 @@ button.danger {
   filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.5));
 }
 
-/* --- Rozbíjení lahví: prosvětlené cihly a záře kolem koule --- */
+/* --- Rozbíjení lahví: základní rozvržení, cihly, pádlo a koule ---
+   (pozn.: na rozdíl od ostatních her tahle sekce dřív obsahovala jen
+   "dorovnávací" přebarvení a chyběla jí úplně základní CSS pro rozložení
+   plochy/cihel/pádla/koule, takže se cihly kvůli position:relative řadily
+   za sebou v běžném dokumentovém toku místo na svoje x/y souřadnice –
+   proto ta "schodovitá" změť. Teď má hra kompletní vlastní základ jako
+   ostatní hry (viz .flappy-game/.flappy-area/... výše). --- */
+
+.breakout-game {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.breakout-hud {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+}
 
 .breakout-area {
+  overflow: hidden;
+  height: 420px;
+  border-radius: 12px;
   background: radial-gradient(ellipse 140% 70% at 50% 100%, rgba(255, 176, 82, 0.22) 0%, rgba(255, 176, 82, 0) 60%),
     linear-gradient(180deg, #0c0704 0%, #241608 22%, #34190a 46%, #532510 68%, #7a3b18 100%);
+  touch-action: none;
+  cursor: pointer;
+}
+
+.breakout-decor {
+  position: absolute;
+  font-size: 20px;
+  pointer-events: none;
+}
+
+.breakout-start-hint {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 6px 12px;
+  background: rgba(15, 17, 21, 0.55);
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 1;
 }
 
 .breakout-brick {
-  position: relative;
+  position: absolute;
   border-radius: 4px;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.12);
 }
@@ -1558,9 +1600,27 @@ button.danger {
 }
 
 .breakout-paddle {
-  filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.5));
+  position: absolute;
+  width: 70px;
+  height: 12px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, #e8d3a8 0%, #c6a668 50%, #8a6a34 100%);
+  border-radius: 6px;
+  box-shadow: 0 4px 5px rgba(0, 0, 0, 0.5);
 }
 
 .breakout-ball {
+  position: absolute;
+  line-height: 1;
+  transform: translate(-50%, -50%);
+  will-change: transform, top, left;
   filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 8px rgba(255, 210, 120, 0.4));
 }
+
+.breakout-hint {
+  margin: 0;
+  font-size: 13px;
+  color: #b8b0a3;
+  text-align: center;
+}
+
