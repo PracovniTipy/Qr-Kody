@@ -38,7 +38,11 @@ const SCORE_UNIT_PX = 160
  * končí, jakmile hráč propadne pod spodní okraj hřiště. Server
  * (submit_game_score, migrace 0012) validuje reálnost skóre podle
  * uplynulého času, tahle komponenta jen odehraje kolo a přes onGameOver
- * nahlásí výsledek.
+ * nahlásí výsledek. Vizuál (kapitola 11, doladění po spuštění MVP): nočně
+ * osvětlená hospoda s trámy a girlandou světýlek pod stropem, poletujícím
+ * prachem/jiskrami na pozadí a plošinami se stínem, leskem a čepovaným
+ * pivem navrch – hráč (tanečník) má pod nohama teplou záři a jemně se
+ * natáčí do rytmu.
  */
 export function ClimbGame({ onGameOver }: Props) {
   const [playerX, setPlayerX] = useState(0)
@@ -190,13 +194,27 @@ export function ClimbGame({ onGameOver }: Props) {
       </div>
 
       <div className="climb-area" ref={areaRef} onPointerDown={handleTap}>
+        <div className="pub-dust" />
+
         {!started && <p className="climb-start-hint">Ťukni pro start</p>}
 
-        <span className="climb-decor" style={{ left: '6%', top: '10%' }}>
+        <span className="climb-decor" style={{ left: '6%', top: '10%', animationDelay: '0s' }}>
           🍷
         </span>
-        <span className="climb-decor" style={{ left: '88%', top: '8%' }}>
+        <span className="climb-decor" style={{ left: '88%', top: '8%', animationDelay: '0.6s' }}>
           🌭
+        </span>
+        <span className="climb-decor" style={{ left: '18%', top: '32%', animationDelay: '1.2s' }}>
+          🎵
+        </span>
+        <span className="climb-decor" style={{ left: '75%', top: '46%', animationDelay: '2s' }}>
+          ✨
+        </span>
+        <span className="climb-decor" style={{ left: '10%', top: '64%', animationDelay: '0.9s' }}>
+          🏮
+        </span>
+        <span className="climb-decor" style={{ left: '82%', top: '72%', animationDelay: '2.6s' }}>
+          🎵
         </span>
 
         {platforms.map((platform) =>
@@ -222,6 +240,10 @@ export function ClimbGame({ onGameOver }: Props) {
           ),
         )}
 
+        <span
+          className="climb-player-glow"
+          style={{ left: `${playerX + PLAYER_SIZE / 2}px`, top: `${playerY + PLAYER_SIZE}px` }}
+        />
         <span className="climb-player" style={{ left: `${playerX}px`, top: `${playerY}px` }}>
           🕺
         </span>
