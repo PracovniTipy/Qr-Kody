@@ -1525,6 +1525,24 @@ button.danger {
 
 .breakout-brick {
   position: relative;
+  border-radius: 4px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.breakout-brick-row0 {
+  background: linear-gradient(180deg, #4f9d5c 0%, #2f7a3c 55%, #1e5228 100%);
+}
+
+.breakout-brick-row1 {
+  background: linear-gradient(180deg, #d99a3a 0%, #b3721f 55%, #7c4d12 100%);
+}
+
+.breakout-brick-row2 {
+  background: linear-gradient(180deg, #3f8fa8 0%, #256b80 55%, #164a58 100%);
+}
+
+.breakout-brick-row3 {
+  background: linear-gradient(180deg, #b1445f 0%, #862f45 55%, #591e2e 100%);
 }
 
 .breakout-brick::after {
