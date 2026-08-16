@@ -17,10 +17,10 @@ interface Props {
 const PLAYER_X_PERCENT = 18
 const PLAYER_SIZE = 34
 const GROUND_HEIGHT = 22
-const GRAVITY = 0.0022
-const JUMP_VELOCITY = -0.62
+const GRAVITY = 0.0016
+const JUMP_VELOCITY = -0.68
 const MAX_FALL_VELOCITY = 0.9
-const BASE_SPEED = 0.16 // px/ms na začátku
+const BASE_SPEED = 0.13 // px/ms na začátku
 const MAX_SPEED = 0.42 // px/ms strop (dosažen cca po 45 s)
 const SPEED_RAMP_PER_SEC = 0.006
 const BASE_SPAWN_INTERVAL_MS = 1500
@@ -35,8 +35,10 @@ const OBSTACLE_TYPES = [
 
 /**
  * Etapa 4 (masterplán, kapitola 11): třetí arkádová hra pro hosty u stolu –
- * „Hospodský běh“ (endless runner, hospodský vizuál). Postava běží pořád
- * dopředu hospodou a ťuknutím přeskakuje překážky (židle, sudy, rozlité
+ * „Hospodský běh“ (endless runner, hospodský vizuál). Hráč je pořádně
+ * podroušený štamgast – běží zrcadlově obráceně a nejistě se kymácí ze
+ * strany na stranu (nad hlavou se mu motají hvězdičky), ale reálně pořád
+ * postupuje dopředu. Ťuknutím přeskakuje překážky (židle, sudy, rozlité
  * pivo), které se ženou zprava. Hra je nekonečná a čím dál těžší (rychlejší
  * překážky, kratší interval mezi nimi) – končí hned při prvním nárazu.
  * Server (submit_game_score, migrace 0011) validuje reálnost skóre podle
@@ -95,7 +97,7 @@ export function RunnerGame({ onGameOver }: Props) {
           playerTopRef.current = groundTop
           velocityRef.current = 0
         }
-        setTilt(Math.max(-25, Math.min(10, velocityRef.current * 40)))
+        setTilt(Math.max(-25, Math.min(10, velocityRef.current * 40)) + Math.sin(elapsedSec * 5) * 10)
 
         if (now - lastSpawn > spawnInterval) {
           lastSpawn = now
@@ -211,11 +213,20 @@ export function RunnerGame({ onGameOver }: Props) {
         ))}
 
         <span
+          className="runner-player-dizzy"
+          style={{
+            left: `${PLAYER_X_PERCENT}%`,
+            top: `${playerTop - 30}px`,
+          }}
+        >
+          💫
+        </span>
+        <span
           className="runner-player"
           style={{
             left: `${PLAYER_X_PERCENT}%`,
             top: `${playerTop}px`,
-            transform: `translateX(-50%) rotate(${tilt}deg)`,
+            transform: `translateX(-50%) scaleX(-1) rotate(${tilt}deg)`,
           }}
         >
           🏃
