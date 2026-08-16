@@ -162,6 +162,9 @@ export function TablePage() {
         <Link to={`/v/${venueSlug}/t/${tableToken}/hra-skok`} className="games-link">
           🕺 Skákání nahoru
         </Link>
+        <Link to={`/v/${venueSlug}/t/${tableToken}/hra-lahve`} className="games-link">
+          🍾 Rozbíjení lahví
+        </Link>
       </div>
 
       <OrdersList orders={orders} />
