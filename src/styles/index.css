@@ -1628,3 +1628,198 @@ button.danger {
   text-align: center;
 }
 
+/* --- Etapa 4 (rozsireni): "Prsi" - dvouhracova karetni hra --- */
+
+.prsi-board {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 0 24px;
+}
+
+.prsi-opponent {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #171a20;
+  border: 1px solid #2a2f3a;
+  border-radius: 8px;
+  color: #a9a29a;
+}
+
+.prsi-card-back-stack {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.prsi-table {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 24px;
+  padding: 16px 0;
+}
+
+.prsi-pile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.prsi-pile-label {
+  font-size: 0.8rem;
+  color: #a9a29a;
+}
+
+.prsi-declared-suit {
+  font-size: 0.8rem;
+  color: #d4a94e;
+}
+
+.prsi-card {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 74px;
+  border-radius: 8px;
+  background: #f2ede3;
+  color: #171a20;
+  font-weight: 700;
+  line-height: 1.1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.prsi-card.red {
+  color: #c0392b;
+}
+
+.prsi-card.black {
+  color: #1a1a1a;
+}
+
+.prsi-card.back {
+  background: repeating-linear-gradient(45deg, #2a2f3a, #2a2f3a 6px, #171a20 6px, #171a20 12px);
+  border: 1px solid #3a4150;
+}
+
+.prsi-card-rank {
+  font-size: 1.05rem;
+}
+
+.prsi-card-suit {
+  font-size: 1.2rem;
+}
+
+.prsi-pending-draw {
+  text-align: center;
+  color: #e0665a;
+  font-weight: 600;
+  margin: 0;
+}
+
+.prsi-turn-indicator {
+  text-align: center;
+  color: #d4a94e;
+  font-weight: 600;
+  margin: 0;
+}
+
+.prsi-hand {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.prsi-hand-card {
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
+.prsi-hand-card.playable {
+  opacity: 1;
+}
+
+.prsi-hand-card:disabled {
+  cursor: default;
+}
+
+.prsi-hand-card.playable:not(:disabled):active {
+  transform: translateY(-4px);
+}
+
+.prsi-draw-button {
+  align-self: center;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background: #d4a94e;
+  color: #171a20;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.prsi-draw-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.prsi-suit-picker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 17, 21, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 10;
+}
+
+.prsi-suit-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  background: #171a20;
+  border: 1px solid #2a2f3a;
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 320px;
+  width: 100%;
+}
+
+.prsi-suit-picker-options {
+  display: flex;
+  gap: 10px;
+}
+
+.prsi-suit-picker-options button {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  border: none;
+  background: #f2ede3;
+  color: #171a20;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.prsi-suit-picker-cancel {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #2a2f3a;
+  background: transparent;
+  color: #a9a29a;
+  cursor: pointer;
+}
+
