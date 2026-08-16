@@ -775,9 +775,15 @@ button.danger {
 
 /* --- Etapa 4: arkádová hra (Chytání padajících surovin) --- */
 
+.games-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 12px 0;
+}
+
 .games-link {
   display: inline-block;
-  margin: 12px 0;
 }
 
 .game-page {
