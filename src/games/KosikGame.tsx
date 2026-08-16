@@ -144,7 +144,19 @@ export function KosikGame({ onGameOver }: Props) {
         onPointerDown={handleAreaPointer}
         onPointerMove={(e) => e.buttons === 1 && handleAreaPointer(e)}
       >
+        <div className="pub-dust" />
         <div className="kosik-floor" />
+
+        <span className="kosik-decor" style={{ left: '8%', top: '38%', animationDelay: '0.4s' }}>
+          🎵
+        </span>
+        <span className="kosik-decor" style={{ left: '86%', top: '30%', animationDelay: '1.4s' }}>
+          🏮
+        </span>
+        <span className="kosik-decor" style={{ left: '78%', top: '55%', animationDelay: '2.1s' }}>
+          ✨
+        </span>
+
         <div className="kosik-thrower" style={{ left: `${throwerX}%` }} aria-hidden="true">
           🧑‍🍳
         </div>
