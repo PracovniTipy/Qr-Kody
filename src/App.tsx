@@ -12,6 +12,7 @@ import { FlappyGamePage } from './pages/public/FlappyGamePage'
 import { RunnerGamePage } from './pages/public/RunnerGamePage'
 import { ClimbGamePage } from './pages/public/ClimbGamePage'
 import { BreakoutGamePage } from './pages/public/BreakoutGamePage'
+import { PrsiGamePage } from './pages/public/PrsiGamePage'
 
 export function App() {
   return (
@@ -33,6 +34,7 @@ export function App() {
       <Route path="/v/:venueSlug/t/:tableToken/hra-beh" element={<RunnerGamePage />} />
       <Route path="/v/:venueSlug/t/:tableToken/hra-skok" element={<ClimbGamePage />} />
       <Route path="/v/:venueSlug/t/:tableToken/hra-lahve" element={<BreakoutGamePage />} />
+      <Route path="/v/:venueSlug/t/:tableToken/hra-prsi" element={<PrsiGamePage />} />
 
       <Route path="*" element={<p style={{ padding: 24 }}>Stránka nenalezena.</p>} />
     </Routes>
