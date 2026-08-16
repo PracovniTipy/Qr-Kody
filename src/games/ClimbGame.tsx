@@ -19,21 +19,23 @@ const BOUNCE_VELOCITY = -0.72
 const MAX_FALL_VELOCITY = 0.9
 const LANDING_ZONE = 50 // tolerance pro dopad na plošinu (px)
 const CAMERA_THRESHOLD_RATIO = 0.42 // nad touto linkou (odshora) se misto hrace posouva svet dolu
-const BASE_PLATFORM_GAP = 80
-const MAX_PLATFORM_GAP = 140
-const PLATFORM_GAP_RAMP_PER_SEC = 1.1
-const BASE_PLATFORM_WIDTH = 74
-const MIN_PLATFORM_WIDTH = 46
-const PLATFORM_WIDTH_SHRINK_PER_SEC = 0.4
+const BASE_PLATFORM_GAP = 60 // rovnomerny "schod" mezi plosinami (bez nahodneho rozhozeni)
+const MAX_PLATFORM_GAP = 95 // strop pod max. vyskou skoku, aby dalsi plosina byla vzdy dosazitelna
+const PLATFORM_GAP_RAMP_PER_SEC = 0.6
+const BASE_PLATFORM_WIDTH = 78
+const MIN_PLATFORM_WIDTH = 50
+const PLATFORM_WIDTH_SHRINK_PER_SEC = 0.3
 const SCORE_UNIT_PX = 20
 const SPAWN_AHEAD_MARGIN = 40 // kolik px nad hornim okrajem hriste musi mit zebrik plosin naskok
+const MAX_X_STEP = 46 // max. vodorovny rozdil mezi sousednimi plosinami, at na ne hrac vzdy dosahne
 
-function spawnPlatform(id: number, topY: number, gap: number, width: number, areaW: number): Platform {
+function spawnPlatform(id: number, topY: number, gap: number, width: number, areaW: number, prevX: number): Platform {
   const type: Platform['type'] = Math.random() < 0.4 ? 'sud' : 'stul'
   const platformWidth = type === 'sud' ? Math.max(36, width - 20) : width
-  const jitter = (Math.random() - 0.5) * Math.min(24, gap * 0.3)
-  const x = Math.random() * Math.max(0, areaW - platformWidth)
-  return { id, x, y: topY - gap + jitter, width: platformWidth, type }
+  const maxX = Math.max(0, areaW - platformWidth)
+  const step = (Math.random() - 0.5) * 2 * MAX_X_STEP
+  const x = Math.min(maxX, Math.max(0, prevX + step))
+  return { id, x, y: topY - gap, width: platformWidth, type }
 }
 
 /**
@@ -103,11 +105,13 @@ export function ClimbGame({ onGameOver }: Props) {
       },
     ]
     let topY = initialPlatforms[0].y
+    let prevX = initialPlatforms[0].x
     while (topY > -areaHeight * 1.5) {
       nextId.current += 1
-      const p = spawnPlatform(nextId.current, topY, BASE_PLATFORM_GAP, BASE_PLATFORM_WIDTH, areaWidth)
+      const p = spawnPlatform(nextId.current, topY, BASE_PLATFORM_GAP, BASE_PLATFORM_WIDTH, areaWidth, prevX)
       initialPlatforms.push(p)
       topY = p.y
+      prevX = p.x
     }
     platformsRef.current = initialPlatforms
     setPlatforms(initialPlatforms)
@@ -178,13 +182,18 @@ export function ClimbGame({ onGameOver }: Props) {
 
         // Doplnit zebrik nahore, at tam vzdy je dost naskoku nad hristem
         // (ne jen "casem", ale podle skutecne naskakane vysky).
-        let topY = shifted.length ? Math.min(...shifted.map((p) => p.y)) : areaH - 90
+        const topmost = shifted.length
+          ? shifted.reduce((a, b) => (a.y < b.y ? a : b))
+          : { y: areaH - 90, x: areaW / 2 }
+        let topY = topmost.y
+        let prevX = topmost.x
         let guard = 0
         while (topY > -SPAWN_AHEAD_MARGIN - platformGap && guard < 12) {
           nextId.current += 1
-          const p = spawnPlatform(nextId.current, topY, platformGap, platformWidth, areaW)
+          const p = spawnPlatform(nextId.current, topY, platformGap, platformWidth, areaW, prevX)
           shifted.push(p)
           topY = p.y
+          prevX = p.x
           guard += 1
         }
 
@@ -281,7 +290,17 @@ export function ClimbGame({ onGameOver }: Props) {
           style={{ left: `${playerX + PLAYER_SIZE / 2}px`, top: `${playerY + PLAYER_SIZE}px` }}
         />
         <span className="climb-player" style={{ left: `${playerX}px`, top: `${playerY}px` }}>
-          🤠
+          <svg viewBox="0 0 32 32" width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="16" cy="13.6" rx="13" ry="3" fill="#2e1c10" />
+            <rect x="9" y="4" width="14" height="9" rx="4" fill="#5a3a1c" />
+            <rect x="9" y="10.6" width="14" height="2.2" fill="#d9a441" />
+            <rect x="9.5" y="23.4" width="13" height="7.2" rx="3" fill="#8a5a2c" />
+            <path d="M11.5 23.4 L20.5 23.4 L16 29.2 Z" fill="#c1442f" />
+            <circle cx="16" cy="18.6" r="6" fill="#e8b382" />
+            <circle cx="13.7" cy="18" r="0.9" fill="#3a2414" />
+            <circle cx="18.3" cy="18" r="0.9" fill="#3a2414" />
+            <path d="M13.2 21 Q16 22.6 18.8 21" stroke="#7a4a24" strokeWidth="1.1" fill="none" strokeLinecap="round" />
+          </svg>
         </span>
       </div>
 
