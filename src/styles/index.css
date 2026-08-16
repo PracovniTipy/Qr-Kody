@@ -1040,3 +1040,81 @@ button.danger {
   color: #b8b0a3;
   text-align: center;
 }
+
+
+.runner-game {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.runner-hud {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+}
+
+.runner-area {
+  position: relative;
+  overflow: hidden;
+  height: 320px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #241608 0%, #4a2c17 55%, #6b4022 100%);
+  touch-action: none;
+  cursor: pointer;
+}
+
+.runner-decor {
+  position: absolute;
+  font-size: 22px;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.runner-ground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 22px;
+  background: repeating-linear-gradient(
+    90deg,
+    #6b4022 0px,
+    #6b4022 38px,
+    #4a2c14 38px,
+    #4a2c14 40px
+  );
+  border-top: 2px solid #2b1a10;
+}
+
+.runner-player {
+  position: absolute;
+  font-size: 30px;
+  line-height: 1;
+  will-change: transform, top;
+}
+
+.runner-obstacle {
+  position: absolute;
+  line-height: 1;
+}
+
+.runner-start-hint {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 6px 12px;
+  background: rgba(15, 17, 21, 0.55);
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 1;
+}
+
+.runner-hint {
+  margin: 0;
+  font-size: 13px;
+  color: #b8b0a3;
+  text-align: center;
+}
