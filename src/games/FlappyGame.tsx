@@ -167,6 +167,7 @@ export function FlappyGame({ onGameOver }: Props) {
       </div>
 
       <div className="flappy-area" ref={areaRef} onPointerDown={handleFlap}>
+        <div className="pub-dust" />
         {!started && <p className="flappy-start-hint">Ťukni pro vzlet</p>}
 
         <span className="flappy-decor" style={{ left: '6%', top: '10%' }}>
