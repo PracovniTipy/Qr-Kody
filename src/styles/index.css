@@ -1146,49 +1146,147 @@ button.danger {
 .climb-hud {
   display: flex;
   justify-content: space-between;
-  font-weight: 600;
+  font-weight: 700;
+  color: #f4d9a0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
 }
 
 .climb-area {
   position: relative;
   overflow: hidden;
   height: 420px;
-  border-radius: 12px;
-  background: linear-gradient(180deg, #241608 0%, #4a2c17 55%, #6b4022 100%);
+  border-radius: 16px;
+  background:
+    radial-gradient(ellipse 140% 70% at 50% 100%, rgba(255, 176, 82, 0.28) 0%, rgba(255, 176, 82, 0) 60%),
+    linear-gradient(180deg, #0c0704 0%, #1c1006 22%, #34190a 46%, #532510 68%, #7a3b18 100%);
+  box-shadow:
+    inset 0 0 60px rgba(0, 0, 0, 0.6),
+    inset 0 8px 24px rgba(0, 0, 0, 0.5);
   touch-action: none;
   cursor: pointer;
 }
 
+.climb-area::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 26px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(40, 22, 10, 0.95) 0px,
+    rgba(40, 22, 10, 0.95) 10px,
+    rgba(70, 42, 20, 0.95) 10px,
+    rgba(70, 42, 20, 0.95) 34px
+  );
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.climb-area::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 22px;
+  height: 6px;
+  background-image: radial-gradient(circle, #ffd98a 0 2px, transparent 3px);
+  background-size: 28px 6px;
+  animation: climb-lights-twinkle 1.6s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 4px #ffcf6b);
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes climb-lights-twinkle {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes climb-dust-drift {
+  from {
+    background-position: 0 0, 40px 60px;
+  }
+  to {
+    background-position: 0 -420px, 40px -520px;
+  }
+}
+
 .climb-decor {
   position: absolute;
-  font-size: 22px;
-  opacity: 0.35;
+  font-size: 20px;
+  opacity: 0.55;
   pointer-events: none;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
+  animation: climb-decor-float 4.5s ease-in-out infinite;
+}
+
+@keyframes climb-decor-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-4deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(4deg);
+  }
 }
 
 .climb-start-hint {
   position: absolute;
-  top: 12px;
+  top: 14px;
   left: 50%;
   transform: translateX(-50%);
   margin: 0;
-  padding: 6px 12px;
-  background: rgba(15, 17, 21, 0.55);
-  border-radius: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(180deg, rgba(40, 22, 10, 0.85), rgba(20, 10, 4, 0.85));
+  border: 1px solid rgba(255, 200, 120, 0.4);
+  border-radius: 999px;
   font-size: 14px;
-  z-index: 1;
+  color: #ffe6b0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  z-index: 2;
+  animation: climb-hint-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes climb-hint-pulse {
+  0%,
+  100% {
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.05);
+  }
 }
 
 .climb-platform {
   position: absolute;
-  height: 14px;
+  height: 16px;
   border-radius: 6px;
+  will-change: top, left;
 }
 
 .climb-platform-stul {
-  background: linear-gradient(180deg, #c68a44 0%, #8a5a28 100%);
+  background: repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.08) 0 3px, transparent 3px 14px),
+    linear-gradient(180deg, #d9a15a 0%, #a5672c 55%, #7a4a1e 100%);
   border: 2px solid #4a2c14;
-  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.35);
+  border-radius: 6px;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.25), inset 0 -3px 6px rgba(0, 0, 0, 0.4),
+    0 6px 10px rgba(0, 0, 0, 0.45);
+}
+
+.climb-platform-stul::after {
+  content: '🍺';
+  position: absolute;
+  top: -18px;
+  left: 6px;
+  font-size: 16px;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.5));
 }
 
 .climb-platform-sud {
@@ -1197,18 +1295,254 @@ button.danger {
   line-height: 1;
   text-align: center;
   border-radius: 0;
+  filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.5));
+}
+
+.climb-player-glow {
+  position: absolute;
+  width: 40px;
+  height: 14px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse, rgba(255, 196, 110, 0.55) 0%, rgba(255, 196, 110, 0) 70%);
+  filter: blur(2px);
+  pointer-events: none;
+  will-change: top, left;
 }
 
 .climb-player {
   position: absolute;
-  font-size: 28px;
+  font-size: 30px;
   line-height: 1;
   will-change: top, left;
+  filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 10px rgba(255, 190, 90, 0.35));
+  animation: climb-player-bob 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes climb-player-bob {
+  from {
+    transform: rotate(-6deg);
+  }
+  to {
+    transform: rotate(6deg);
+  }
 }
 
 .climb-hint {
   margin: 0;
   font-size: 13px;
-  color: #b8b0a3;
+  color: #e2c9a0;
   text-align: center;
+}
+
+
+
+/* --- Etapa 4 (vizuální dorovnání, kapitola 11): jednotná noční hospodská
+   atmosféra pro všechny arkádové hry – trámy se řadou girlandových
+   světýlek pod stropem, poletující jiskřičky/prach na pozadí a jemně
+   plovoucí dekorace. Sdílené vrstvy se aplikují přes prvky ".kosik-area",
+   ".flappy-area", ".runner-area" a ".breakout-area" (".climb-area" má
+   vlastní verzi definovanou přímo u své sekce výše). --- */
+
+.kosik-area,
+.flappy-area,
+.runner-area,
+.breakout-area {
+  position: relative;
+}
+
+.kosik-area::before,
+.flappy-area::before,
+.runner-area::before,
+.breakout-area::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 26px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(40, 22, 10, 0.95) 0px,
+    rgba(40, 22, 10, 0.95) 10px,
+    rgba(70, 42, 20, 0.95) 10px,
+    rgba(70, 42, 20, 0.95) 34px
+  );
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.kosik-area::after,
+.flappy-area::after,
+.runner-area::after,
+.breakout-area::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 22px;
+  height: 6px;
+  background-image: radial-gradient(circle, #ffd98a 0 2px, transparent 3px);
+  background-size: 28px 6px;
+  animation: climb-lights-twinkle 1.6s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 4px #ffcf6b);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.pub-dust {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(255, 224, 168, 0.5) 0 1.5px, transparent 2px),
+    radial-gradient(circle, rgba(255, 224, 168, 0.32) 0 1px, transparent 2px);
+  background-size: 90px 140px, 130px 190px;
+  background-position: 0 0, 40px 60px;
+  animation: climb-dust-drift 16s linear infinite;
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.kosik-decor,
+.flappy-decor,
+.runner-decor,
+.breakout-decor {
+  animation: climb-decor-float 4.5s ease-in-out infinite;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.5));
+  opacity: 0.55;
+}
+
+.kosik-decor {
+  position: absolute;
+  font-size: 20px;
+  pointer-events: none;
+}
+
+/* --- Chytání surovin: teplejší, hlubší noční pozadí a záře pod postavami --- */
+
+.kosik-area {
+  background: radial-gradient(ellipse 140% 60% at 50% 100%, rgba(255, 176, 82, 0.2) 0%, rgba(255, 176, 82, 0) 60%),
+    linear-gradient(180deg, #0f0a16 0%, #1c1526 30%, #241c30 60%, #171a20 100%);
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.55);
+}
+
+.kosik-item {
+  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.5));
+  animation: kosik-item-spin 1.6s linear infinite;
+}
+
+@keyframes kosik-item-spin {
+  from {
+    transform: translate(-50%, 0) rotate(-8deg);
+  }
+  to {
+    transform: translate(-50%, 0) rotate(8deg);
+  }
+}
+
+.kosik-basket {
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.55));
+}
+
+.kosik-basket::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  width: 70%;
+  height: 10px;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse, rgba(255, 196, 110, 0.4) 0%, rgba(255, 196, 110, 0) 70%);
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.kosik-thrower {
+  filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.5));
+}
+
+/* --- Let mezi sudy: noční obloha nad sudy, prosvětlené hrany sudů --- */
+
+.flappy-area {
+  background: radial-gradient(ellipse 140% 70% at 50% 100%, rgba(255, 176, 82, 0.22) 0%, rgba(255, 176, 82, 0) 60%),
+    linear-gradient(180deg, #0c0704 0%, #241608 22%, #4a2c17 55%, #6b4022 80%, #3a2414 100%);
+}
+
+.flappy-pipe {
+  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.4), 0 6px 10px rgba(0, 0, 0, 0.45);
+}
+
+.flappy-pipe-top::after,
+.flappy-pipe-bottom::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0));
+  border-radius: 8px 8px 0 0;
+  pointer-events: none;
+}
+
+.flappy-pipe-top::after {
+  bottom: 0;
+}
+
+.flappy-pipe-bottom::after {
+  top: 0;
+}
+
+.flappy-bird {
+  filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 8px rgba(255, 210, 120, 0.35));
+}
+
+/* --- Hospodský běh: noční ulička hospody a zvýrazněná podlaha --- */
+
+.runner-area {
+  background: radial-gradient(ellipse 140% 70% at 50% 100%, rgba(255, 176, 82, 0.22) 0%, rgba(255, 176, 82, 0) 60%),
+    linear-gradient(180deg, #0c0704 0%, #241608 30%, #4a2c17 65%, #6b4022 100%);
+}
+
+.runner-ground {
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.08);
+}
+
+.runner-obstacle {
+  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.5));
+}
+
+.runner-player,
+.runner-player-dizzy {
+  filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.5));
+}
+
+/* --- Rozbíjení lahví: prosvětlené cihly a záře kolem koule --- */
+
+.breakout-area {
+  background: radial-gradient(ellipse 140% 70% at 50% 100%, rgba(255, 176, 82, 0.22) 0%, rgba(255, 176, 82, 0) 60%),
+    linear-gradient(180deg, #0c0704 0%, #241608 22%, #34190a 46%, #532510 68%, #7a3b18 100%);
+}
+
+.breakout-brick {
+  position: relative;
+}
+
+.breakout-brick::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: 2px;
+  height: 30%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0));
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.breakout-paddle {
+  filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.5));
+}
+
+.breakout-ball {
+  filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 8px rgba(255, 210, 120, 0.4));
 }
