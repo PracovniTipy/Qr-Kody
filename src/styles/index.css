@@ -1309,11 +1309,17 @@ button.danger {
 
 .climb-player {
   position: absolute;
-  font-size: 30px;
+  display: block;
+  width: 32px;
+  height: 32px;
   line-height: 1;
   will-change: top, left;
   filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 10px rgba(255, 190, 90, 0.35));
   animation: climb-player-bob 0.5s ease-in-out infinite alternate;
+}
+
+.climb-player svg {
+  display: block;
 }
 
 @keyframes climb-player-bob {
