@@ -1094,6 +1094,24 @@ button.danger {
   will-change: transform, top;
 }
 
+.runner-player-dizzy {
+  position: absolute;
+  font-size: 18px;
+  line-height: 1;
+  transform: translateX(-50%);
+  animation: runner-dizzy-spin 900ms linear infinite;
+  pointer-events: none;
+}
+
+@keyframes runner-dizzy-spin {
+  from {
+    transform: translateX(-50%) rotate(0deg);
+  }
+  to {
+    transform: translateX(-50%) rotate(360deg);
+  }
+}
+
 .runner-obstacle {
   position: absolute;
   line-height: 1;
