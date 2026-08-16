@@ -163,11 +163,24 @@ export function FlappyGame({ onGameOver }: Props) {
   return (
     <div className="flappy-game">
       <div className="flappy-hud">
-        <span>Skóre: {score}</span>
+        <span>🍺 Skóre: {score}</span>
       </div>
 
       <div className="flappy-area" ref={areaRef} onPointerDown={handleFlap}>
         {!started && <p className="flappy-start-hint">Ťukni pro vzlet</p>}
+
+        <span className="flappy-decor" style={{ left: '6%', top: '10%' }}>
+          🍷
+        </span>
+        <span className="flappy-decor" style={{ left: '88%', top: '8%' }}>
+          🌭
+        </span>
+        <span className="flappy-decor" style={{ left: '8%', bottom: '8%' }}>
+          🥴
+        </span>
+        <span className="flappy-decor" style={{ left: '84%', bottom: '10%' }}>
+          🍻
+        </span>
 
         {pipes.map((pipe) => (
           <div key={pipe.id}>
@@ -190,11 +203,11 @@ export function FlappyGame({ onGameOver }: Props) {
             transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
           }}
         >
-          🐦
+          🍺
         </span>
       </div>
 
-      <p className="flappy-hint">Ťukej do plochy a proletávej mezerami mezi sudy – hra je čím dál rychlejší.</p>
+      <p className="flappy-hint">Ťukej do plochy a proletávej s půllitrem mezerami mezi sudy v hospodě – čím dál rychlejší!</p>
     </div>
   )
 }
