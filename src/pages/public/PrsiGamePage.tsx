@@ -86,11 +86,48 @@ function mapReason(reason?: string): string {
   }
 }
 
-function CardFace({ card }: { card: Card }) {
+// Postava (Material "person" ikona) pro figurkove karty - Spodek/Svrsek/Kral.
+// Spodek a Svrsek se tradicne rozeznavaji podle toho, jestli je znak barvy
+// NAD postavou (Svrsek - "horni") nebo POD ni (Spodek - "dolni"); Kral ma
+// misto toho korunku - viz CardFace nize.
+const PERSON_PATH =
+  'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'
+
+function FaceFigure({ rank }: { rank: 'spodek' | 'svrsek' | 'kral' }) {
+  if (rank === 'kral') {
+    return (
+      <svg viewBox="0 0 24 28" width="22" height="24" className="prsi-face-icon" aria-hidden="true">
+        <g transform="translate(0,4)">
+          <path d={PERSON_PATH} fill="currentColor" />
+        </g>
+        <g className="prsi-crown">
+          <polygon points="5,6 7,1.5 9.5,5 12,0.5 14.5,5 17,1.5 19,6" />
+          <rect x="5" y="5.5" width="14" height="2" />
+        </g>
+      </svg>
+    )
+  }
   return (
-    <span className={`prsi-card suit-${card.suit}`}>
+    <svg viewBox="0 0 24 24" width="20" height="20" className="prsi-face-icon" aria-hidden="true">
+      <path d={PERSON_PATH} fill="currentColor" />
+    </svg>
+  )
+}
+
+function CardFace({ card }: { card: Card }) {
+  const isFace = card.rank === 'spodek' || card.rank === 'svrsek' || card.rank === 'kral'
+  return (
+    <span className={`prsi-card suit-${card.suit}${isFace ? ' prsi-card-face' : ''}`}>
       <span className="prsi-card-rank">{RANK_LABEL[card.rank]}</span>
-      <span className="prsi-card-suit">{SUIT_SYMBOL[card.suit]}</span>
+      {card.rank === 'svrsek' && <span className="prsi-face-pip prsi-face-pip-top">{SUIT_SYMBOL[card.suit]}</span>}
+      {isFace ? (
+        <FaceFigure rank={card.rank as 'spodek' | 'svrsek' | 'kral'} />
+      ) : (
+        <span className="prsi-card-suit">{SUIT_SYMBOL[card.suit]}</span>
+      )}
+      {card.rank === 'spodek' && (
+        <span className="prsi-face-pip prsi-face-pip-bottom">{SUIT_SYMBOL[card.suit]}</span>
+      )}
     </span>
   )
 }
