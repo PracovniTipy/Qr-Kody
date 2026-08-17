@@ -1694,12 +1694,20 @@ button.danger {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
-.prsi-card.red {
+.prsi-card.suit-srdce {
   color: #c0392b;
 }
 
-.prsi-card.black {
-  color: #1a1a1a;
+.prsi-card.suit-zaludy {
+  color: #7a4a1e;
+}
+
+.prsi-card.suit-kule {
+  color: #a8790f;
+}
+
+.prsi-card.suit-listy {
+  color: #2f7a3d;
 }
 
 .prsi-card.back {
@@ -1804,14 +1812,23 @@ button.danger {
 }
 
 .prsi-suit-picker-options button {
-  width: 52px;
-  height: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 56px;
+  padding: 8px 6px;
   border-radius: 8px;
   border: none;
   background: #f2ede3;
   color: #171a20;
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   cursor: pointer;
+}
+
+.prsi-suit-picker-label {
+  font-size: 0.7rem;
+  font-weight: 600;
 }
 
 .prsi-suit-picker-cancel {
