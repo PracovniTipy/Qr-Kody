@@ -1,11 +1,16 @@
-// Tvar dat pro dvouhracovou karetni hru "Prsi" (viz supabase/migrations/0014_games_prsi.sql).
-// Na rozdil od jednohracovych arkadovek (GamePage a spol.) tu nebezi zadna
-// smycka na klientovi - veskery stav hry drzi server, klient jen posila tahy
-// pres RPC funkce a cte aktualni stav z prsi_sessions (verejne citelne pres
-// RLS) + svoji ruku pres prsi_get_my_hand (overenou tajnym tokenem hrace).
+// Tvar dat pro dvouhracovou karetni hru "Prsi" (viz supabase/migrations/0014_games_prsi.sql
+// a 0015_prsi_czech_deck.sql). Na rozdil od jednohracovych arkadovek (GamePage
+// a spol.) tu nebezi zadna smycka na klientovi - veskery stav hry drzi server,
+// klient jen posila tahy pres RPC funkce a cte aktualni stav z prsi_sessions
+// (verejne citelne pres RLS) + svoji ruku pres prsi_get_my_hand (overenou
+// tajnym tokenem hrace).
+//
+// Klasicky cesky (mariasovy) balicek - zadne mezinarodni piky/kary, zadna
+// dama. 32 karet: 4 barvy x 8 hodnot. Svrsek je divoka karta menici barvu
+// (viz prsi_play_card), Eso zastavuje souperuv tah, Sedma (7) nuti lizani.
 
-export type Suit = 'S' | 'H' | 'D' | 'C'
-export type Rank = '7' | '8' | '9' | '10' | 'J' | 'Q' | 'K' | 'A'
+export type Suit = 'zaludy' | 'kule' | 'srdce' | 'listy'
+export type Rank = '7' | '8' | '9' | '10' | 'spodek' | 'svrsek' | 'kral' | 'eso'
 
 export interface Card {
   rank: Rank
