@@ -10,11 +10,23 @@ import {
   PrsiJoinGameResult,
   PrsiSavedPlayer,
   PrsiSessionRow,
+  Rank,
   Suit,
 } from '../../types/prsi'
 
-const SUIT_SYMBOL: Record<Suit, string> = { S: '♠', H: '♥', D: '♦', C: '♣' }
-const SUIT_LABEL: Record<Suit, string> = { S: 'piky', H: 'srdce', D: 'kára', C: 'kříže' }
+const SUIT_SYMBOL: Record<Suit, string> = { zaludy: '🌰', kule: '🔔', srdce: '♥', listy: '🍃' }
+const SUIT_LABEL: Record<Suit, string> = { zaludy: 'žaludy', kule: 'kule', srdce: 'srdce', listy: 'listy' }
+const RANK_LABEL: Record<Rank, string> = {
+  '7': '7',
+  '8': '8',
+  '9': '9',
+  '10': '10',
+  spodek: 'Sp',
+  svrsek: 'Sv',
+  kral: 'Kr',
+  eso: 'Es',
+}
+const ALL_SUITS: Suit[] = ['zaludy', 'kule', 'srdce', 'listy']
 const STORAGE_PREFIX = 'prsi_player_'
 
 type DisplayPhase = 'idle' | 'waiting' | 'playing' | 'finished'
@@ -75,10 +87,9 @@ function mapReason(reason?: string): string {
 }
 
 function CardFace({ card }: { card: Card }) {
-  const isRed = card.suit === 'H' || card.suit === 'D'
   return (
-    <span className={`prsi-card ${isRed ? 'red' : 'black'}`}>
-      <span className="prsi-card-rank">{card.rank}</span>
+    <span className={`prsi-card suit-${card.suit}`}>
+      <span className="prsi-card-rank">{RANK_LABEL[card.rank]}</span>
       <span className="prsi-card-suit">{SUIT_SYMBOL[card.suit]}</span>
     </span>
   )
@@ -109,7 +120,7 @@ export function PrsiGamePage() {
   const [starting, setStarting] = useState(false)
   const [acting, setActing] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [pendingJackCard, setPendingJackCard] = useState<Card | null>(null)
+  const [pendingWildCard, setPendingWildCard] = useState<Card | null>(null)
   const [suitChoiceOpen, setSuitChoiceOpen] = useState(false)
 
   useEffect(() => {
@@ -252,8 +263,8 @@ export function PrsiGamePage() {
 
   function handleCardTap(card: Card) {
     if (!isMyTurn || acting) return
-    if (card.rank === 'J') {
-      setPendingJackCard(card)
+    if (card.rank === 'svrsek') {
+      setPendingWildCard(card)
       setSuitChoiceOpen(true)
       return
     }
@@ -261,10 +272,10 @@ export function PrsiGamePage() {
   }
 
   function chooseSuit(suit: Suit) {
-    if (!pendingJackCard) return
+    if (!pendingWildCard) return
     setSuitChoiceOpen(false)
-    const card = pendingJackCard
-    setPendingJackCard(null)
+    const card = pendingWildCard
+    setPendingWildCard(null)
     void submitPlay(card, suit)
   }
 
@@ -302,7 +313,7 @@ export function PrsiGamePage() {
   function isCardPlayable(card: Card): boolean {
     if (!session) return false
     if (session.pending_draw > 0) return card.rank === '7'
-    if (card.rank === 'J') return true
+    if (card.rank === 'svrsek') return true
     if (requiredSuit && card.suit === requiredSuit) return true
     if (session.discard_top && card.rank === session.discard_top.rank) return true
     return false
@@ -402,11 +413,11 @@ export function PrsiGamePage() {
       {suitChoiceOpen && (
         <div className="prsi-suit-picker-overlay">
           <div className="prsi-suit-picker">
-            <p>Vyber barvu, kterou spodek mění:</p>
+            <p>Vyber barvu, kterou svršek mění:</p>
             <div className="prsi-suit-picker-options">
-              {(['S', 'H', 'D', 'C'] as Suit[]).map((s) => (
-                <button type="button" key={s} onClick={() => chooseSuit(s)}>
-                  {SUIT_SYMBOL[s]}
+              {ALL_SUITS.map((s) => (
+                <button type="button" className={`suit-${s}`} key={s} onClick={() => chooseSuit(s)}>
+                  {SUIT_SYMBOL[s]} <span className="prsi-suit-picker-label">{SUIT_LABEL[s]}</span>
                 </button>
               ))}
             </div>
@@ -415,7 +426,7 @@ export function PrsiGamePage() {
               className="prsi-suit-picker-cancel"
               onClick={() => {
                 setSuitChoiceOpen(false)
-                setPendingJackCard(null)
+                setPendingWildCard(null)
               }}
             >
               Zrušit
