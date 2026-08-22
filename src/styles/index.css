@@ -1859,3 +1859,247 @@ button.danger {
   cursor: pointer;
 }
 
+/* --- Etapa 4 (rozsireni): "Poker" (Texas Hold'em, az 8 hracu) --- */
+
+.poker-waiting-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #a9a29a;
+}
+
+.poker-secondary {
+  background: transparent;
+  border: 1px solid #2a2f3a;
+  color: #a9a29a;
+}
+
+.poker-board {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 0 24px;
+}
+
+.poker-stage-label {
+  text-align: center;
+  color: #a9a29a;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.poker-community {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  min-height: 86px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.poker-community-empty {
+  color: #6b6459;
+  font-size: 0.85rem;
+}
+
+.poker-card {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 48px;
+  height: 68px;
+  border-radius: 8px;
+  background: #f2ede3;
+  color: #171a20;
+  font-weight: 700;
+  line-height: 1.1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.poker-card.red {
+  color: #c0392b;
+}
+
+.poker-card.black {
+  color: #171a20;
+}
+
+.poker-card-rank {
+  font-size: 0.95rem;
+}
+
+.poker-card-suit {
+  font-size: 1.1rem;
+}
+
+.poker-seats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.poker-seat {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #171a20;
+  border: 1px solid #2a2f3a;
+  border-radius: 8px;
+  color: #a9a29a;
+  font-size: 0.9rem;
+}
+
+.poker-seat.is-me {
+  border-color: #3a4150;
+  color: #f2ede3;
+}
+
+.poker-seat.on-turn {
+  border-color: #d4a94e;
+}
+
+.poker-seat.status-folded {
+  opacity: 0.5;
+}
+
+.poker-seat.status-out {
+  opacity: 0.35;
+}
+
+.poker-seat-name {
+  font-weight: 600;
+  flex: 1 1 auto;
+}
+
+.poker-seat-chips {
+  color: #d4a94e;
+}
+
+.poker-seat-bet {
+  font-size: 0.8rem;
+}
+
+.poker-seat-status {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: #2a2f3a;
+}
+
+.poker-seat-status.on-turn-label {
+  background: #d4a94e;
+  color: #171a20;
+  font-weight: 700;
+}
+
+.poker-my-hand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.poker-my-hand-label {
+  color: #a9a29a;
+  font-size: 0.85rem;
+  margin-right: 4px;
+}
+
+.poker-turn-indicator {
+  text-align: center;
+  color: #d4a94e;
+  font-weight: 600;
+  margin: 0;
+}
+
+.poker-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.poker-actions > button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background: #d4a94e;
+  color: #171a20;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.poker-actions > button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.poker-actions .poker-fold {
+  background: transparent;
+  border: 1px solid #2a2f3a;
+  color: #a9a29a;
+}
+
+.poker-raise-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.poker-raise-row input {
+  width: 90px;
+  background: #171a20;
+  border: 1px solid #2a2f3a;
+  border-radius: 8px;
+  padding: 10px 8px;
+  color: #f2ede3;
+  font-size: 1rem;
+}
+
+.poker-result {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  background: #171a20;
+  border: 1px solid #2a2f3a;
+  border-radius: 8px;
+}
+
+.poker-reveals,
+.poker-pots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #a9a29a;
+  font-size: 0.9rem;
+}
+
+.poker-result button {
+  align-self: center;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background: #d4a94e;
+  color: #171a20;
+  font-weight: 600;
+  cursor: pointer;
+}
+
