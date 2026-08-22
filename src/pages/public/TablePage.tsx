@@ -168,6 +168,9 @@ export function TablePage() {
         <Link to={`/v/${venueSlug}/t/${tableToken}/hra-prsi`} className="games-link">
           🃏 Prší
         </Link>
+        <Link to={`/v/${venueSlug}/t/${tableToken}/hra-poker`} className="games-link">
+          ♠️ Poker
+        </Link>
       </div>
 
       <OrdersList orders={orders} />
