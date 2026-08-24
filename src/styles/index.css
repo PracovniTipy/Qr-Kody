@@ -2103,3 +2103,113 @@ button.danger {
   cursor: pointer;
 }
 
+/* --- Etapa 4 (rozsireni): "Dama" (klasicka ceska/ruska dama, 8x8) --- */
+
+.dama-board-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0 24px;
+}
+
+.dama-color-indicator {
+  text-align: center;
+  color: #a9a29a;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.dama-turn-indicator {
+  text-align: center;
+  color: #d4a94e;
+  font-weight: 600;
+  margin: 0;
+}
+
+.dama-board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 1 / 1;
+  border: 2px solid #2a2f3a;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.dama-square {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dama-square.light {
+  background: #e8dcc4;
+}
+
+.dama-square.dark {
+  background: #7a5230;
+}
+
+.dama-square.dark.selectable {
+  cursor: pointer;
+}
+
+.dama-square:disabled {
+  cursor: default;
+}
+
+.dama-square.selected {
+  box-shadow: inset 0 0 0 3px #d4a94e;
+}
+
+.dama-piece {
+  width: 78%;
+  height: 78%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  line-height: 1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.dama-piece.piece-w {
+  background: radial-gradient(circle at 35% 30%, #ffffff, #d8d2c4 60%, #b8b09c 100%);
+  border: 1px solid #8a8272;
+}
+
+.dama-piece.piece-b {
+  background: radial-gradient(circle at 35% 30%, #4a4a4a, #1a1a1a 60%, #000000 100%);
+  border: 1px solid #000000;
+}
+
+.dama-piece.king::after {
+  content: '♛';
+}
+
+.dama-piece.piece-w.king::after {
+  color: #171a20;
+}
+
+.dama-piece.piece-b.king::after {
+  color: #d4a94e;
+}
+
+.dama-target-dot {
+  position: absolute;
+  width: 22%;
+  height: 22%;
+  border-radius: 50%;
+  background: rgba(212, 169, 78, 0.85);
+  pointer-events: none;
+}
+
