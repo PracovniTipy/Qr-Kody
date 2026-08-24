@@ -15,6 +15,7 @@ import { BreakoutGamePage } from './pages/public/BreakoutGamePage'
 import { PrsiGamePage } from './pages/public/PrsiGamePage'
 import { PokerGamePage } from './pages/public/PokerGamePage'
 import { DamaGamePage } from './pages/public/DamaGamePage'
+import { SachyGamePage } from './pages/public/SachyGamePage'
 
 export function App() {
   return (
@@ -39,6 +40,7 @@ export function App() {
       <Route path="/v/:venueSlug/t/:tableToken/hra-prsi" element={<PrsiGamePage />} />
       <Route path="/v/:venueSlug/t/:tableToken/hra-poker" element={<PokerGamePage />} />
       <Route path="/v/:venueSlug/t/:tableToken/hra-dama" element={<DamaGamePage />} />
+      <Route path="/v/:venueSlug/t/:tableToken/hra-sachy" element={<SachyGamePage />} />
 
       <Route path="*" element={<p style={{ padding: 24 }}>Stránka nenalezena.</p>} />
     </Routes>
