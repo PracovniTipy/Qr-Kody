@@ -1,4 +1,4 @@
-# StůlHraje — Etapa 0 + Etapa 1 + Etapa 1.1 + Etapa 2 + Etapa 4 (kompletní) + hodnocení + vícejazyčné menu
+# StůlHraje — Etapa 0 + Etapa 1 + Etapa 1.1 + Etapa 2 + Etapa 4 (kompletní) + hodnocení + vícejazyčné menu + turnaje
 
 Technický základ (Etapa 0) podle kapitoly 14 hlavního plánu: React/TypeScript
 PWA, napojení na Supabase, migrace pro hospody/uživatele/stoly/menu,
@@ -245,13 +245,26 @@ takže admin nemusí vyplnit překlad pro každou položku. V administraci
 (`MenuManager.tsx`, `MenuItemRowEditor.tsx`) jsou anglická pole nepovinná
 a existující anglický název se ukazuje v závorce vedle českého.
 
+## 3l) Co je hotové (turnaje)
+
+Masterplán, "co zbývá": turnaje. Personál v administraci (`/admin/hospoda/
+:venueId/turnaje`) založí časově omezenou soutěž v jedné z pěti arkádových
+her se skóre (Chytání surovin, Let mezi sudy, Hospodský běh, Skákání
+nahoru, Rozbíjení lahví) — zadá název a volitelně dobu trvání v hodinách;
+bez vyplnění turnaj běží, dokud ho personál ručně neukončí (migrace 0025).
+Žebříček turnaje je jen výřez existující tabulky `game_scores` podle času
+konání (`get_tournament_leaderboard`) — skóre se pořád ukládá stejně jako
+dřív přes `submit_game_score`, žádná nová anti-cheat logika není potřeba.
+Hosté vidí odkaz "🏆 Turnaje" na stránce stolu jen když aspoň jeden turnaj
+zrovna běží (`get_active_tournaments`), s žebříčkem každého na `/turnaje`.
+
 ## 4) Co záměrně chybí (přijde v dalších etapách)
 
 Masterplán (kapitola 7/11) je teď na úrovni MVP kompletní (arkádové i
 stolní hry). Chybí ale vše ostatní z masterplánu: partnerský program,
-turnaje, hráčské účty (kapitola 9 — s tím souvisí i to, že vynucení
-příplatkové služby za hry zatím nemá skutečnou fakturaci/platební bránu) a
-mapa podniků, a pilotní test (Etapa 5) u reálné hospody. Podle pravidel pro
+hráčské účty (kapitola 9 — s tím souvisí i to, že vynucení příplatkové
+služby za hry zatím nemá skutečnou fakturaci/platební bránu) a mapa
+podniků, a pilotní test (Etapa 5) u reálné hospody. Podle pravidel pro
 vývoj (kapitola 13) se nemá programovat všechno najednou.
 
 ## 5) Nasazení
