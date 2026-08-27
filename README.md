@@ -1,4 +1,4 @@
-# StůlHraje — Etapa 0 + Etapa 1 + Etapa 1.1 + Etapa 2 + Etapa 4 (částečně)
+# StůlHraje — Etapa 0 + Etapa 1 + Etapa 1.1 + Etapa 2 + Etapa 4 (kompletní) + hodnocení
 
 Technický základ (Etapa 0) podle kapitoly 14 hlavního plánu: React/TypeScript
 PWA, napojení na Supabase, migrace pro hospody/uživatele/stoly/menu,
@@ -15,12 +15,15 @@ Etapa 2 (podle kapitoly 11 hlavního plánu) přidává košík, odeslání
 objednávky ze stránky stolu, kuchyňskou obrazovku pro personál, QR platbu a
 přehled tržeb.
 
-Etapa 4 (zatím jen část) přidává všech pět arkádových her se skóre pro
-hosty u stolu — "Chytání padajících surovin", "Let mezi sudy" (flappy-bird
-styl), "Hospodský běh" (endless runner), "Skákání nahoru" (doodle-jump
-styl) a "Rozbíjení lahví" (arkanoid styl) — se žebříčkem hospody a
-základní ochranou proti podvádění. Zbývají už jen stolní hry bez skóre z
-masterplánu (kapitola 7), na řadu přijdou později, viz kapitola 11.
+Etapa 4 je teď kompletní: pět arkádových her se skóre pro hosty u stolu —
+"Chytání padajících surovin", "Let mezi sudy" (flappy-bird styl),
+"Hospodský běh" (endless runner), "Skákání nahoru" (doodle-jump styl) a
+"Rozbíjení lahví" (arkanoid styl) — se žebříčkem hospody a základní
+ochranou proti podvádění, plus všech pět stolních her bez skóre z
+masterplánu (kapitola 7): Prší, Poker, Dáma, Šachy a Flaška (společenská
+hra "otoč lahev" pro celý stůl, až 10 hráčů). Hry jdou navíc nastavit jako
+volitelná příplatková služba (níže) a nad rámec masterplánu přibylo i
+jednoduché hodnocení podniku od hostů.
 
 > Poznámka: kód je hotový a připravený, ale tenhle sandbox nemá přístup k npm
 > registru, takže tady nešlo spustit `npm install` ani ověřit build. Než to
@@ -188,18 +191,66 @@ zkontrolovat/upravit a teprve pak publikovat do menu hospody, viz kapitola
 - hráčské účty zatím nejsou (kapitola 9, Etapa 9) — žebříček je anonymní,
   jen s dobrovolnou přezdívkou u skóre (max. 20 znaků).
 
+## 3h) Co je hotové (Etapa 4 — stolní hry bez skóre)
+
+Masterplán (kapitola 7) počítal s pěti stolními hrami bez skóre — všech
+pět je hotových a dostupných ze stránky stolu:
+
+- `/hra-prsi` — **Prší** (česká karetní hra pro 2 hráče u stejného stolu,
+  každý na svém telefonu), migrace 0014–0015,
+- `/hra-poker` — **Poker** (Texas hold'em pro 2 hráče, sázky/žetony bez
+  reálných peněz — jen herní žetony), migrace 0016,
+- `/hra-dama` — **Dáma** (klasická pravidla vč. povinného braní), migrace
+  0017,
+- `/hra-sachy` — **Šachy** (plná pravidla vč. rošády, braní mimochodem a
+  proměny pěšce), migrace 0018,
+- `/hra-flaska` — **Flaška** ("otoč lahev") — na rozdíl od ostatních čtyř
+  není pro 2 hráče, ale pro celý stůl najednou (až 10 lidí), bez
+  soutěžení: kdokoliv se připojí jménem, kdokoliv může zatočit "lahví" a
+  serveru náhodně vybere cíl a kartu Pravda/Úkol z pevné banky 60 otázek
+  (bez alkoholových "vypij" úkolů), migrace 0019, 0021.
+
+Stejný bezpečnostní vzor jako u ostatního: hráč nikdy nezapisuje přímo do
+herních tabulek, jen přes SECURITY DEFINER RPC funkce, tajné údaje (karty
+v ruce, herní token) drží tabulky bez jediné RLS policy (`*_private`),
+veřejný stav hry (co vidí oba hráči) má jen `select`.
+
+## 3i) Co je hotové (hry volitelné / příplatková služba)
+
+Majitel hospody může v Nastavení hospody (zaškrtávátko "Hry u stolu –
+příplatková služba 299 Kč/měsíc") všech deset her pro danou hospodu úplně
+vypnout — migrace 0020, 0022. Vypínač je vynucený i na serveru, ne jen v
+UI: pokud je vypnutý, RPC funkce pro založení nové hry/session (u všech
+deseti her i u hodnocení se to netýká) vrátí `null` bez ohledu na to, jestli
+host zná přímou URL konkrétní hry. Skutečné strhávání platby za
+příplatkovou službu (fakturace/platební brána) zatím není součástí — jen
+samotný vypínač.
+
+## 3j) Co je hotové (hodnocení podniku)
+
+Nad rámec masterplánu: host může na `/hodnoceni` anonymně ohodnotit
+návštěvu 1–5 hvězdičkami + volitelný komentář (migrace 0023,
+`submit_venue_rating`). Průměr a počet hodnocení se zobrazují i veřejně na
+stránce stolu (`get_venue_rating_summary`), jednotlivé komentáře vidí jen
+personál/majitel hospody na `/admin/hospoda/:venueId/hodnoceni` (RLS
+`venue_ratings_select_staff`, stejný vzor jako u Tržeb).
+
 ## 4) Co záměrně chybí (přijde v dalších etapách)
 
-Masterplán (kapitola 7) počítá už jen s pěti stolními hrami bez skóre
-(šachy, prší, dáma, flaška, poker) — podle kapitoly 11 na řadu přijdou až
-po MVP, ne najednou. Dál chybí i vše ostatní z masterplánu:
-partnerský program, turnaje, hráčské účty, vícejazyčné menu, hodnocení,
-mapa podniků, předplatné a pilotní test (Etapa 5) u reálné hospody. Podle
-pravidel pro vývoj (kapitola 13) se nemá programovat všechno najednou —
-tohle je záměrně jen základ, na kterém se dá stavět.
+Masterplán (kapitola 7/11) je teď na úrovni MVP kompletní (arkádové i
+stolní hry). Chybí ale vše ostatní z masterplánu: partnerský program,
+turnaje, hráčské účty (kapitola 9 — s tím souvisí i to, že vynucení
+příplatkové služby za hry zatím nemá skutečnou fakturaci/platební bránu),
+vícejazyčné menu, mapa podniků a pilotní test (Etapa 5) u reálné hospody.
+Podle pravidel pro vývoj (kapitola 13) se nemá programovat všechno
+najednou.
 
 ## 5) Nasazení
 
-Plán počítá s Cloudflare Pages/Workers (viz kapitola 8). Build příkaz:
-`npm run build`, výstupní složka: `dist`. Proměnné `VITE_SUPABASE_URL` a
-`VITE_SUPABASE_ANON_KEY` nastav v prostředí Cloudflare Pages, ne do repozitáře.
+Aplikace běží na [Railway](https://railway.app) (auto-deploy z `main`
+větve tohoto repozitáře) — ne na Cloudflare Pages/Workers, jak počítal
+původní plán z kapitoly 8; Railway se ukázalo jednodušší pro tenhle setup.
+Build příkaz: `npm run build` (spouští `tsc -b && vite build`, takže build
+spadne i na TypeScript chybě, ne jen na chybě bundleru), výstupní složka:
+`dist`. Proměnné `VITE_SUPABASE_URL` a `VITE_SUPABASE_ANON_KEY` jsou
+nastavené v prostředí Railway, ne v repozitáři.
