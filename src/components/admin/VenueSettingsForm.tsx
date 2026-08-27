@@ -18,6 +18,7 @@ export function VenueSettingsForm({ venue, onSaved }: Props) {
   const [slug, setSlug] = useState(venue.slug)
   const [isActive, setIsActive] = useState(venue.is_active)
   const [bankAccount, setBankAccount] = useState(venue.bank_account ?? '')
+  const [gamesEnabled, setGamesEnabled] = useState(venue.games_enabled)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [savedMsg, setSavedMsg] = useState(false)
@@ -30,7 +31,13 @@ export function VenueSettingsForm({ venue, onSaved }: Props) {
 
     const { data, error: updateError } = await supabase
       .from('venues')
-      .update({ name, slug, is_active: isActive, bank_account: bankAccount.trim() || null })
+      .update({
+        name,
+        slug,
+        is_active: isActive,
+        bank_account: bankAccount.trim() || null,
+        games_enabled: gamesEnabled,
+      })
       .eq('id', venue.id)
       .select()
       .single()
@@ -83,6 +90,15 @@ export function VenueSettingsForm({ venue, onSaved }: Props) {
         onChange={(e) => setBankAccount(e.target.value)}
         placeholder="CZ6508000000192000145399"
       />
+
+      <label className="checkbox-row">
+        <input
+          type="checkbox"
+          checked={gamesEnabled}
+          onChange={(e) => setGamesEnabled(e.target.checked)}
+        />
+        Hry u stolu (příplatková služba 299 Kč/měsíc) – zobrazit hostům na stránce stolu
+      </label>
 
       {error && <p className="error">{error}</p>}
       {savedMsg && !error && <p className="success">Uloženo.</p>}
