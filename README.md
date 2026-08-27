@@ -1,4 +1,4 @@
-# StůlHraje — Etapa 0 + Etapa 1 + Etapa 1.1 + Etapa 2 + Etapa 4 (kompletní) + hodnocení
+# StůlHraje — Etapa 0 + Etapa 1 + Etapa 1.1 + Etapa 2 + Etapa 4 (kompletní) + hodnocení + vícejazyčné menu
 
 Technický základ (Etapa 0) podle kapitoly 14 hlavního plánu: React/TypeScript
 PWA, napojení na Supabase, migrace pro hospody/uživatele/stoly/menu,
@@ -235,15 +235,24 @@ stránce stolu (`get_venue_rating_summary`), jednotlivé komentáře vidí jen
 personál/majitel hospody na `/admin/hospoda/:venueId/hodnoceni` (RLS
 `venue_ratings_select_staff`, stejný vzor jako u Tržeb).
 
+## 3k) Co je hotové (vícejazyčné menu)
+
+Masterplán, "co zbývá": vícejazyčné menu. Kategorie i položky menu mají
+volitelné anglické překlady (`name_en` u kategorií, `name_en`/`description_en`
+u položek — migrace 0024). Na stránce stolu je nad menu přepínač CS/EN
+(`MenuList.tsx`); chybějící překlad se zobrazí jako fallback na český text,
+takže admin nemusí vyplnit překlad pro každou položku. V administraci
+(`MenuManager.tsx`, `MenuItemRowEditor.tsx`) jsou anglická pole nepovinná
+a existující anglický název se ukazuje v závorce vedle českého.
+
 ## 4) Co záměrně chybí (přijde v dalších etapách)
 
 Masterplán (kapitola 7/11) je teď na úrovni MVP kompletní (arkádové i
 stolní hry). Chybí ale vše ostatní z masterplánu: partnerský program,
 turnaje, hráčské účty (kapitola 9 — s tím souvisí i to, že vynucení
-příplatkové služby za hry zatím nemá skutečnou fakturaci/platební bránu),
-vícejazyčné menu, mapa podniků a pilotní test (Etapa 5) u reálné hospody.
-Podle pravidel pro vývoj (kapitola 13) se nemá programovat všechno
-najednou.
+příplatkové služby za hry zatím nemá skutečnou fakturaci/platební bránu) a
+mapa podniků, a pilotní test (Etapa 5) u reálné hospody. Podle pravidel pro
+vývoj (kapitola 13) se nemá programovat všechno najednou.
 
 ## 5) Nasazení
 
