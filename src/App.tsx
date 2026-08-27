@@ -5,6 +5,7 @@ import { AdminVenuePage } from './pages/admin/AdminVenuePage'
 import { QrStandPage } from './pages/admin/QrStandPage'
 import { KitchenPage } from './pages/admin/KitchenPage'
 import { RevenuePage } from './pages/admin/RevenuePage'
+import { RatingsPage } from './pages/admin/RatingsPage'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { TablePage } from './pages/public/TablePage'
 import { GamePage } from './pages/public/GamePage'
@@ -17,6 +18,7 @@ import { PokerGamePage } from './pages/public/PokerGamePage'
 import { DamaGamePage } from './pages/public/DamaGamePage'
 import { SachyGamePage } from './pages/public/SachyGamePage'
 import { FlaskaGamePage } from './pages/public/FlaskaGamePage'
+import { RateVenuePage } from './pages/public/RateVenuePage'
 
 export function App() {
   return (
@@ -30,6 +32,7 @@ export function App() {
         <Route path="/admin/hospoda/:venueId/tisk" element={<QrStandPage />} />
           <Route path="/admin/hospoda/:venueId/kuchyne" element={<KitchenPage />} />
         <Route path="/admin/hospoda/:venueId/trzby" element={<RevenuePage />} />
+        <Route path="/admin/hospoda/:venueId/hodnoceni" element={<RatingsPage />} />
       </Route>
 
       <Route path="/v/:venueSlug/t/:tableToken" element={<TablePage />} />
@@ -43,6 +46,7 @@ export function App() {
       <Route path="/v/:venueSlug/t/:tableToken/hra-dama" element={<DamaGamePage />} />
       <Route path="/v/:venueSlug/t/:tableToken/hra-sachy" element={<SachyGamePage />} />
       <Route path="/v/:venueSlug/t/:tableToken/hra-flaska" element={<FlaskaGamePage />} />
+      <Route path="/v/:venueSlug/t/:tableToken/hodnoceni" element={<RateVenuePage />} />
 
       <Route path="*" element={<p style={{ padding: 24 }}>Stránka nenalezena.</p>} />
     </Routes>
