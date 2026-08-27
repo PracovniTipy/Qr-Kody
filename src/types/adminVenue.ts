@@ -6,6 +6,7 @@ export interface VenueRow {
   name: string
   is_active: boolean
   bank_account: string | null
+  games_enabled: boolean
 }
 
 export interface TableRow {

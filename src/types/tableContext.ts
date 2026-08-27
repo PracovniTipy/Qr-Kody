@@ -21,6 +21,7 @@ export interface TableContext {
   venue: {
     name: string
     bank_account: string | null
+    games_enabled: boolean
   }
   table: {
     label: string
