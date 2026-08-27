@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabaseClient'
 import { TableContext } from '../../types/tableContext'
 import { OrderSummary } from '../../types/order'
+import { RatingSummary } from '../../types/rating'
 import { MenuList } from '../../components/MenuList'
 import { OrdersList } from '../../components/OrdersList'
 import { PaymentPanel } from '../../components/PaymentPanel'
@@ -25,6 +26,7 @@ export function TablePage() {
   const [status, setStatus] = useState<'loading' | 'ok' | 'not_found' | 'error'>('loading')
   const [quantities, setQuantities] = useState<Record<string, number>>({})
   const [orders, setOrders] = useState<OrderSummary[]>([])
+  const [ratingSummary, setRatingSummary] = useState<RatingSummary | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
@@ -63,6 +65,23 @@ export function TablePage() {
       .then(({ data }) => {
         if (!active) return
         if (Array.isArray(data)) setOrders(data as OrderSummary[])
+      })
+
+    return () => {
+      active = false
+    }
+  }, [tableToken, status])
+
+  useEffect(() => {
+    if (!tableToken || status !== 'ok') return
+
+    let active = true
+
+    supabase
+      .rpc('get_venue_rating_summary', { p_qr_token: tableToken })
+      .then(({ data }) => {
+        if (!active) return
+        if (data) setRatingSummary(data as RatingSummary)
       })
 
     return () => {
@@ -147,7 +166,16 @@ export function TablePage() {
       <header className="table-header">
         <h1>{context.venue.name}</h1>
         <p>Stůl {context.table.label}</p>
+        {ratingSummary && ratingSummary.count > 0 && (
+          <p className="table-rating-summary">
+            ★ {ratingSummary.avg_stars.toFixed(1)} ({ratingSummary.count} hodnocení)
+          </p>
+        )}
       </header>
+
+      <Link to={`/v/${venueSlug}/t/${tableToken}/hodnoceni`} className="rate-venue-link">
+        ⭐ Ohodnotit podnik
+      </Link>
 
       {context.venue.games_enabled && (
         <div className="games-links">
