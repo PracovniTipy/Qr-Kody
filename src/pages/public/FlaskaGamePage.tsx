@@ -158,7 +158,11 @@ export function FlaskaGamePage() {
       })
       const joinResult = joinData as FlaskaJoinResult | null
       if (!joinResult?.ok || !joinResult.player_id || !joinResult.player_token) {
-        setError(joinResult?.reason === 'full' ? 'U stolu je už moc hráčů.' : 'Připojení se nepodařilo. Zkus to znovu.')
+        setError(
+          joinResult?.reason === 'full'
+            ? 'U stolu je už plno (max 10 hráčů).'
+            : 'Připojení se nepodařilo. Zkus to znovu.'
+        )
         setJoining(false)
         return
       }
@@ -230,8 +234,8 @@ export function FlaskaGamePage() {
       {!joined && (
         <div className="game-idle flaska-join">
           <p>
-            Flaška je společenská hra pro celý stůl - připoj se jménem a kdokoliv pak může zatočit "lahví". Padne na
-            náhodného hráče u stolu a vybere se karta Pravda nebo Úkol.
+            Flaška je společenská hra pro celý stůl (až 10 hráčů) - připoj se jménem a kdokoliv pak může zatočit
+            "lahví". Padne na náhodného hráče u stolu a vybere se karta Pravda nebo Úkol.
           </p>
           <input
             type="text"
