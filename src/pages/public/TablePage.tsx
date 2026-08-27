@@ -149,35 +149,40 @@ export function TablePage() {
         <p>Stůl {context.table.label}</p>
       </header>
 
-      <div className="games-links">
-        <Link to={`/v/${venueSlug}/t/${tableToken}/hra`} className="games-link">
-          🥕 Chytání surovin
-        </Link>
-        <Link to={`/v/${venueSlug}/t/${tableToken}/hra-let`} className="games-link">
-          🍺 Let mezi sudy
-        </Link>
-        <Link to={`/v/${venueSlug}/t/${tableToken}/hra-beh`} className="games-link">
-          🏃 Hospodský běh
-        </Link>
-        <Link to={`/v/${venueSlug}/t/${tableToken}/hra-skok`} className="games-link">
-          🕺 Skákání nahoru
-        </Link>
-        <Link to={`/v/${venueSlug}/t/${tableToken}/hra-lahve`} className="games-link">
-          🍾 Rozbíjení lahví
-        </Link>
-        <Link to={`/v/${venueSlug}/t/${tableToken}/hra-prsi`} className="games-link">
-          🃏 Prší
-        </Link>
-        <Link to={`/v/${venueSlug}/t/${tableToken}/hra-poker`} className="games-link">
-          ♠️ Poker
-        </Link>
-        <Link to={`/v/${venueSlug}/t/${tableToken}/hra-dama`} className="games-link">
-          ⚫ Dáma
-        </Link>
-        <Link to={`/v/${venueSlug}/t/${tableToken}/hra-sachy`} className="games-link">
-          ♞ Šachy
-        </Link>
-      </div>
+      {context.venue.games_enabled && (
+        <div className="games-links">
+          <Link to={`/v/${venueSlug}/t/${tableToken}/hra`} className="games-link">
+            🥕 Chytání surovin
+          </Link>
+          <Link to={`/v/${venueSlug}/t/${tableToken}/hra-let`} className="games-link">
+            🍺 Let mezi sudy
+          </Link>
+          <Link to={`/v/${venueSlug}/t/${tableToken}/hra-beh`} className="games-link">
+            🏃 Hospodský běh
+          </Link>
+          <Link to={`/v/${venueSlug}/t/${tableToken}/hra-skok`} className="games-link">
+            🕺 Skákání nahoru
+          </Link>
+          <Link to={`/v/${venueSlug}/t/${tableToken}/hra-lahve`} className="games-link">
+            🍾 Rozbíjení lahví
+          </Link>
+          <Link to={`/v/${venueSlug}/t/${tableToken}/hra-prsi`} className="games-link">
+            🃏 Prší
+          </Link>
+          <Link to={`/v/${venueSlug}/t/${tableToken}/hra-poker`} className="games-link">
+            ♠️ Poker
+          </Link>
+          <Link to={`/v/${venueSlug}/t/${tableToken}/hra-dama`} className="games-link">
+            ⚫ Dáma
+          </Link>
+          <Link to={`/v/${venueSlug}/t/${tableToken}/hra-sachy`} className="games-link">
+            ♞ Šachy
+          </Link>
+          <Link to={`/v/${venueSlug}/t/${tableToken}/hra-flaska`} className="games-link">
+            🍾 Flaška
+          </Link>
+        </div>
+      )}
 
       <OrdersList orders={orders} />
 
