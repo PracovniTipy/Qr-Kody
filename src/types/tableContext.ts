@@ -4,7 +4,9 @@
 export interface MenuItem {
   id: string
   name: string
+  name_en: string | null
   description: string | null
+  description_en: string | null
   price_czk: number
   is_available: boolean
   sort_order: number
@@ -13,6 +15,7 @@ export interface MenuItem {
 export interface MenuCategory {
   id: string
   name: string
+  name_en: string | null
   sort_order: number
   items: MenuItem[]
 }

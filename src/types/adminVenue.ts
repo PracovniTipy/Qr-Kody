@@ -22,6 +22,7 @@ export interface MenuCategoryRow {
   id: string
   venue_id: string
   name: string
+  name_en: string | null
   sort_order: number
 }
 
@@ -30,7 +31,9 @@ export interface MenuItemRow {
   venue_id: string
   category_id: string
   name: string
+  name_en: string | null
   description: string | null
+  description_en: string | null
   price_czk: number
   is_available: boolean
   sort_order: number
