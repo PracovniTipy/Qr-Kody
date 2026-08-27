@@ -1,4 +1,4 @@
-# StůlHraje — Etapa 0 + Etapa 1 + Etapa 1.1 + Etapa 2 + Etapa 4 (kompletní) + hodnocení + vícejazyčné menu + turnaje
+# StůlHraje — Etapa 0 + Etapa 1 + Etapa 1.1 + Etapa 2 + Etapa 4 (kompletní) + hodnocení + vícejazyčné menu + turnaje + mapa podniků
 
 Technický základ (Etapa 0) podle kapitoly 14 hlavního plánu: React/TypeScript
 PWA, napojení na Supabase, migrace pro hospody/uživatele/stoly/menu,
@@ -258,14 +258,26 @@ dřív přes `submit_game_score`, žádná nová anti-cheat logika není potřeb
 Hosté vidí odkaz "🏆 Turnaje" na stránce stolu jen když aspoň jeden turnaj
 zrovna běží (`get_active_tournaments`), s žebříčkem každého na `/turnaje`.
 
+## 3m) Co je hotové (mapa podniků)
+
+Masterplán, "co zbývá": mapa podniků. Hospoda se v Nastavení hospody může
+dobrovolně přihlásit do veřejného adresáře (`listed_publicly`, migrace
+0026) a vyplnit město/adresu. Veřejná stránka `/podniky` (`get_public_venues`)
+pak vypíše všechny přihlášené hospody; klik na hospodu vede na neveřejný
+náhled menu `/v/:venueSlug` (`get_venue_preview`, `VenuePreviewPage.tsx`) —
+jen orientační zobrazení menu (včetně CS/EN přepínače) bez objednávání, her
+nebo plateb. Skutečné objednávání jde pořád jen přes QR kód na konkrétním
+stole (`/v/:venueSlug/t/:tableToken`) — bez adresáře se na hospodě nic
+nemění, přihlášení do mapy je čistě volitelné.
+
 ## 4) Co záměrně chybí (přijde v dalších etapách)
 
 Masterplán (kapitola 7/11) je teď na úrovni MVP kompletní (arkádové i
-stolní hry). Chybí ale vše ostatní z masterplánu: partnerský program,
+stolní hry). Chybí ale vše ostatní z masterplánu: partnerský program a
 hráčské účty (kapitola 9 — s tím souvisí i to, že vynucení příplatkové
-služby za hry zatím nemá skutečnou fakturaci/platební bránu) a mapa
-podniků, a pilotní test (Etapa 5) u reálné hospody. Podle pravidel pro
-vývoj (kapitola 13) se nemá programovat všechno najednou.
+služby za hry zatím nemá skutečnou fakturaci/platební bránu), a pilotní
+test (Etapa 5) u reálné hospody. Podle pravidel pro vývoj (kapitola 13) se
+nemá programovat všechno najednou.
 
 ## 5) Nasazení
 
