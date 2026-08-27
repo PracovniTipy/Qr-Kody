@@ -2533,3 +2533,128 @@ button.danger {
   cursor: pointer;
 }
 
+/* --- Hodnocení podniku (masterplán, "co zbývá") --- */
+
+.table-rating-summary {
+  margin: 2px 0 0;
+  color: #d4a94e;
+  font-size: 0.9rem;
+}
+
+.rate-venue-link {
+  display: inline-block;
+  margin: 4px 0 12px;
+  color: #d4a94e;
+  text-decoration: underline;
+  font-size: 0.9rem;
+}
+
+.rate-venue-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 24px 0;
+  text-align: center;
+}
+
+.rate-venue-stars {
+  display: flex;
+  gap: 6px;
+}
+
+.rate-venue-star {
+  background: none;
+  border: none;
+  font-size: 2.2rem;
+  line-height: 1;
+  color: #a9a29a;
+  cursor: pointer;
+  padding: 0;
+}
+
+.rate-venue-star.filled {
+  color: #d4a94e;
+}
+
+.rate-venue-comment {
+  width: 100%;
+  max-width: 360px;
+  min-height: 90px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #2a2f3a;
+  background: #171a20;
+  color: #f2ede6;
+  font: inherit;
+  resize: vertical;
+}
+
+.rate-venue-submit {
+  padding: 14px 28px;
+  border-radius: 999px;
+  border: none;
+  background: #d4a94e;
+  color: #171a20;
+  font-weight: 700;
+  font-size: 1.05rem;
+  cursor: pointer;
+}
+
+.rate-venue-submit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.rate-venue-thanks {
+  padding: 40px 0;
+  text-align: center;
+  font-size: 1.1rem;
+}
+
+.ratings-distribution {
+  flex: 1;
+  gap: 4px;
+}
+
+.ratings-distribution-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #a9a29a;
+}
+
+.ratings-distribution-count {
+  color: #f2ede6;
+}
+
+.ratings-comments {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ratings-comment {
+  background: #171a20;
+  border: 1px solid #2a2f3a;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.ratings-comment-stars {
+  color: #d4a94e;
+  letter-spacing: 2px;
+}
+
+.ratings-comment-text {
+  margin: 6px 0;
+}
+
+.ratings-comment-date {
+  font-size: 0.8rem;
+  color: #a9a29a;
+}
+
