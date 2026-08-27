@@ -21,11 +21,14 @@ import { SachyGamePage } from './pages/public/SachyGamePage'
 import { FlaskaGamePage } from './pages/public/FlaskaGamePage'
 import { RateVenuePage } from './pages/public/RateVenuePage'
 import { TournamentsPage } from './pages/public/TournamentsPage'
+import { VenueMapPage } from './pages/public/VenueMapPage'
+import { VenuePreviewPage } from './pages/public/VenuePreviewPage'
 
 export function App() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/admin" replace />} />
+      <Route path="/podniky" element={<VenueMapPage />} />
 
       <Route path="/admin/login" element={<AdminLoginPage />} />
       <Route element={<ProtectedRoute />}>
@@ -51,6 +54,7 @@ export function App() {
       <Route path="/v/:venueSlug/t/:tableToken/hra-flaska" element={<FlaskaGamePage />} />
       <Route path="/v/:venueSlug/t/:tableToken/hodnoceni" element={<RateVenuePage />} />
       <Route path="/v/:venueSlug/t/:tableToken/turnaje" element={<TournamentsPage />} />
+      <Route path="/v/:venueSlug" element={<VenuePreviewPage />} />
 
       <Route path="*" element={<p style={{ padding: 24 }}>Stránka nenalezena.</p>} />
     </Routes>
