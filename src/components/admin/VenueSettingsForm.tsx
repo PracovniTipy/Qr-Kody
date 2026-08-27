@@ -19,6 +19,9 @@ export function VenueSettingsForm({ venue, onSaved }: Props) {
   const [isActive, setIsActive] = useState(venue.is_active)
   const [bankAccount, setBankAccount] = useState(venue.bank_account ?? '')
   const [gamesEnabled, setGamesEnabled] = useState(venue.games_enabled)
+  const [city, setCity] = useState(venue.city ?? '')
+  const [address, setAddress] = useState(venue.address ?? '')
+  const [listedPublicly, setListedPublicly] = useState(venue.listed_publicly)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [savedMsg, setSavedMsg] = useState(false)
@@ -37,6 +40,9 @@ export function VenueSettingsForm({ venue, onSaved }: Props) {
         is_active: isActive,
         bank_account: bankAccount.trim() || null,
         games_enabled: gamesEnabled,
+        city: city.trim() || null,
+        address: address.trim() || null,
+        listed_publicly: listedPublicly,
       })
       .eq('id', venue.id)
       .select()
@@ -98,6 +104,26 @@ export function VenueSettingsForm({ venue, onSaved }: Props) {
           onChange={(e) => setGamesEnabled(e.target.checked)}
         />
         Hry u stolu (příplatková služba 299 Kč/měsíc) – zobrazit hostům na stránce stolu
+      </label>
+
+      <label htmlFor="venue-city">Město (pro mapu podniků, nepovinné)</label>
+      <input id="venue-city" value={city} onChange={(e) => setCity(e.target.value)} placeholder="Praha" />
+
+      <label htmlFor="venue-address">Adresa (pro mapu podniků, nepovinné)</label>
+      <input
+        id="venue-address"
+        value={address}
+        onChange={(e) => setAddress(e.target.value)}
+        placeholder="Lipová 12"
+      />
+
+      <label className="checkbox-row">
+        <input
+          type="checkbox"
+          checked={listedPublicly}
+          onChange={(e) => setListedPublicly(e.target.checked)}
+        />
+        Zobrazit hospodu ve veřejné mapě podniků (/podniky)
       </label>
 
       {error && <p className="error">{error}</p>}
