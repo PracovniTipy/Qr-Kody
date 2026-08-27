@@ -115,6 +115,37 @@ body {
   margin: 0;
 }
 
+/* --- Vícejazyčné menu (masterplán, "co zbývá") --- */
+.menu-lang-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.menu-lang-toggle button {
+  background: #2a2f3a;
+  color: #f2ede6;
+  border: 1px solid #2a2f3a;
+  border-radius: 999px;
+  padding: 4px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.menu-lang-toggle button.active {
+  background: #d4a94e;
+  border-color: #d4a94e;
+  color: #171a20;
+}
+
+.menu-name-en {
+  font-weight: 400;
+  font-size: 0.85rem;
+  color: #a9a29a;
+}
+
 /* --- Etapa 1: administrace hospody --- */
 
 .dashboard header {
