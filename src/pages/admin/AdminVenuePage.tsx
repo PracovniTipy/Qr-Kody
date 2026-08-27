@@ -101,6 +101,9 @@ export function AdminVenuePage() {
           <Link to={`/admin/hospoda/${venue.id}/hodnoceni`} className="kitchen-link">
             Hodnocení →
           </Link>
+          <Link to={`/admin/hospoda/${venue.id}/turnaje`} className="kitchen-link">
+            Turnaje →
+          </Link>
         </div>
       </header>
 
