@@ -2689,3 +2689,49 @@ button.danger {
   color: #a9a29a;
 }
 
+/* --- Turnaje (masterplán, "co zbývá") --- */
+
+.tournaments-link {
+  display: block;
+}
+
+.tournament-board {
+  margin-top: 20px;
+}
+
+.tournament-game-label {
+  font-weight: 400;
+  font-size: 0.9rem;
+  color: #a9a29a;
+}
+
+.tournament-ends-hint {
+  margin: 0 0 8px;
+  font-size: 0.85rem;
+  color: #a9a29a;
+}
+
+.tournament-admin-card {
+  margin-top: 16px;
+}
+
+.tournament-status {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.tournament-status.active {
+  background: rgba(212, 169, 78, 0.18);
+  color: #d4a94e;
+}
+
+.tournament-status.ended {
+  background: rgba(169, 162, 154, 0.15);
+  color: #a9a29a;
+}
+
