@@ -4,6 +4,7 @@ import { supabase } from '../../lib/supabaseClient'
 import { TableContext } from '../../types/tableContext'
 import { OrderSummary } from '../../types/order'
 import { RatingSummary } from '../../types/rating'
+import { ActiveTournament } from '../../types/tournament'
 import { MenuList } from '../../components/MenuList'
 import { OrdersList } from '../../components/OrdersList'
 import { PaymentPanel } from '../../components/PaymentPanel'
@@ -27,6 +28,7 @@ export function TablePage() {
   const [quantities, setQuantities] = useState<Record<string, number>>({})
   const [orders, setOrders] = useState<OrderSummary[]>([])
   const [ratingSummary, setRatingSummary] = useState<RatingSummary | null>(null)
+  const [activeTournaments, setActiveTournaments] = useState<ActiveTournament[]>([])
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
@@ -82,6 +84,23 @@ export function TablePage() {
       .then(({ data }) => {
         if (!active) return
         if (data) setRatingSummary(data as RatingSummary)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [tableToken, status])
+
+  useEffect(() => {
+    if (!tableToken || status !== 'ok') return
+
+    let active = true
+
+    supabase
+      .rpc('get_active_tournaments', { p_qr_token: tableToken })
+      .then(({ data }) => {
+        if (!active) return
+        if (Array.isArray(data)) setActiveTournaments(data as ActiveTournament[])
       })
 
     return () => {
@@ -176,6 +195,12 @@ export function TablePage() {
       <Link to={`/v/${venueSlug}/t/${tableToken}/hodnoceni`} className="rate-venue-link">
         ⭐ Ohodnotit podnik
       </Link>
+
+      {context.venue.games_enabled && activeTournaments.length > 0 && (
+        <Link to={`/v/${venueSlug}/t/${tableToken}/turnaje`} className="rate-venue-link tournaments-link">
+          🏆 Turnaje ({activeTournaments.length})
+        </Link>
+      )}
 
       {context.venue.games_enabled && (
         <div className="games-links">
