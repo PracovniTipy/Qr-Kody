@@ -2735,3 +2735,54 @@ button.danger {
   color: #a9a29a;
 }
 
+/* --- Mapa podniků (masterplán, "co zbývá") --- */
+
+.venue-map-page {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.venue-map-page header {
+  text-align: center;
+  padding: 16px 0 24px;
+  border-bottom: 1px solid #2a2f3a;
+  margin-bottom: 16px;
+}
+
+.venue-directory-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.venue-directory-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+  background: #171a20;
+  border: 1px solid #2a2f3a;
+  border-radius: 10px;
+  color: #f2ede3;
+  text-decoration: none;
+}
+
+.venue-directory-item strong {
+  color: #d4a94e;
+}
+
+.venue-directory-address {
+  font-size: 0.85rem;
+  color: #a9a29a;
+}
+
+.venue-preview-hint {
+  margin-top: 4px;
+  font-size: 0.85rem;
+  color: #a9a29a;
+}
+
