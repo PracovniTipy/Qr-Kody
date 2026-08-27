@@ -18,9 +18,12 @@ interface Props {
  */
 export function MenuManager({ venueId, categories, items, onCategoriesChange, onItemsChange }: Props) {
   const [newCategoryName, setNewCategoryName] = useState('')
+  const [newCategoryNameEn, setNewCategoryNameEn] = useState('')
   const [addingCategory, setAddingCategory] = useState(false)
   const [categoryError, setCategoryError] = useState<string | null>(null)
-  const [newItemDrafts, setNewItemDrafts] = useState<Record<string, { name: string; price: string }>>({})
+  const [newItemDrafts, setNewItemDrafts] = useState<
+    Record<string, { name: string; nameEn: string; price: string }>
+  >({})
 
   async function handleAddCategory(e: FormEvent) {
     e.preventDefault()
@@ -32,7 +35,12 @@ export function MenuManager({ venueId, categories, items, onCategoriesChange, on
 
     const { data, error } = await supabase
       .from('menu_categories')
-      .insert({ venue_id: venueId, name: newCategoryName.trim(), sort_order: nextSort })
+      .insert({
+        venue_id: venueId,
+        name: newCategoryName.trim(),
+        name_en: newCategoryNameEn.trim() || null,
+        sort_order: nextSort,
+      })
       .select()
       .single()
 
@@ -45,6 +53,7 @@ export function MenuManager({ venueId, categories, items, onCategoriesChange, on
 
     onCategoriesChange([...categories, data as MenuCategoryRow])
     setNewCategoryName('')
+    setNewCategoryNameEn('')
   }
 
   async function handleDeleteCategory(category: MenuCategoryRow) {
@@ -76,6 +85,7 @@ export function MenuManager({ venueId, categories, items, onCategoriesChange, on
         venue_id: venueId,
         category_id: category.id,
         name: draft.name.trim(),
+        name_en: draft.nameEn.trim() || null,
         price_czk: Number(draft.price),
         sort_order: nextSort,
       })
@@ -84,7 +94,7 @@ export function MenuManager({ venueId, categories, items, onCategoriesChange, on
 
     if (!error && data) {
       onItemsChange([...items, data as MenuItemRow])
-      setNewItemDrafts((prev) => ({ ...prev, [category.id]: { name: '', price: '' } }))
+      setNewItemDrafts((prev) => ({ ...prev, [category.id]: { name: '', nameEn: '', price: '' } }))
     }
   }
 
@@ -100,12 +110,15 @@ export function MenuManager({ venueId, categories, items, onCategoriesChange, on
         const categoryItems = items
           .filter((i) => i.category_id === category.id)
           .sort((a, b) => a.sort_order - b.sort_order)
-        const draft = newItemDrafts[category.id] ?? { name: '', price: '' }
+        const draft = newItemDrafts[category.id] ?? { name: '', nameEn: '', price: '' }
 
         return (
           <div key={category.id} className="menu-category-admin">
             <div className="entity-main category-header">
-              <h3>{category.name}</h3>
+              <h3>
+                {category.name}
+                {category.name_en && <span className="menu-name-en"> ({category.name_en})</span>}
+              </h3>
               <button type="button" className="danger" onClick={() => handleDeleteCategory(category)}>
                 Smazat kategorii
               </button>
@@ -139,6 +152,16 @@ export function MenuManager({ venueId, categories, items, onCategoriesChange, on
                 }
               />
               <input
+                placeholder="Název anglicky (nepovinné)"
+                value={draft.nameEn}
+                onChange={(e) =>
+                  setNewItemDrafts((prev) => ({
+                    ...prev,
+                    [category.id]: { ...draft, nameEn: e.target.value },
+                  }))
+                }
+              />
+              <input
                 type="number"
                 min={0}
                 placeholder="Cena Kč"
@@ -162,6 +185,11 @@ export function MenuManager({ venueId, categories, items, onCategoriesChange, on
           value={newCategoryName}
           onChange={(e) => setNewCategoryName(e.target.value)}
           required
+        />
+        <input
+          placeholder="Anglicky (nepovinné)"
+          value={newCategoryNameEn}
+          onChange={(e) => setNewCategoryNameEn(e.target.value)}
         />
         <button type="submit" disabled={addingCategory}>
           {addingCategory ? 'Přidávám…' : 'Přidat kategorii'}

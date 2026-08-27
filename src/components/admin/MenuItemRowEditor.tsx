@@ -12,7 +12,9 @@ interface Props {
 export function MenuItemRowEditor({ item, onSaved, onDeleted }: Props) {
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(item.name)
+  const [nameEn, setNameEn] = useState(item.name_en ?? '')
   const [description, setDescription] = useState(item.description ?? '')
+  const [descriptionEn, setDescriptionEn] = useState(item.description_en ?? '')
   const [price, setPrice] = useState(String(item.price_czk))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -26,7 +28,9 @@ export function MenuItemRowEditor({ item, onSaved, onDeleted }: Props) {
       .from('menu_items')
       .update({
         name: name.trim(),
+        name_en: nameEn.trim() || null,
         description: description.trim() || null,
+        description_en: descriptionEn.trim() || null,
         price_czk: Number(price),
       })
       .eq('id', item.id)
@@ -67,9 +71,19 @@ export function MenuItemRowEditor({ item, onSaved, onDeleted }: Props) {
         <form className="inline-form item-edit-form" onSubmit={handleSave}>
           <input value={name} onChange={(e) => setName(e.target.value)} required placeholder="Název" />
           <input
+            value={nameEn}
+            onChange={(e) => setNameEn(e.target.value)}
+            placeholder="Název anglicky (nepovinné)"
+          />
+          <input
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Popis (nepovinné)"
+          />
+          <input
+            value={descriptionEn}
+            onChange={(e) => setDescriptionEn(e.target.value)}
+            placeholder="Popis anglicky (nepovinné)"
           />
           <input
             type="number"
@@ -94,7 +108,10 @@ export function MenuItemRowEditor({ item, onSaved, onDeleted }: Props) {
   return (
     <li className={item.is_available ? '' : 'inactive'}>
       <div className="entity-main">
-        <strong>{item.name}</strong>
+        <strong>
+          {item.name}
+          {item.name_en && <span className="menu-name-en"> ({item.name_en})</span>}
+        </strong>
         {item.description && <p className="menu-item-desc">{item.description}</p>}
       </div>
       <div className="entity-actions">
