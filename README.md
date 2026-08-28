@@ -275,6 +275,12 @@ nebo plateb. Skutečné objednávání jde pořád jen přes QR kód na konkrét
 stole (`/v/:venueSlug/t/:tableToken`) — bez adresáře se na hospodě nic
 nemění, přihlášení do mapy je čistě volitelné.
 
+Hospoda si volitelně může vyplnit i otevírací dobu jako volný text (např.
+"Po-Pá 11-23, So-Ne 12-22", pole `opening_hours`, migrace 0027) — zobrazí
+se v adresáři i na náhledu menu. Jde jen o informační text pro hosty,
+žádná logika "otevřeno teď" se z něj nepočítá (u volného formátu by to
+stejně nešlo spolehlivě vyhodnotit).
+
 ## 4) Co záměrně chybí (přijde v dalších etapách)
 
 Masterplán (kapitola 7/11) je teď na úrovni MVP kompletní (arkádové i
