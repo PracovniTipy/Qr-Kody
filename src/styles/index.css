@@ -748,6 +748,25 @@ button.danger {
 
 .revenue-page header {
   margin-bottom: 16px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.revenue-export-btn {
+  background: #171a20;
+  border: 1px solid #2a2f3a;
+  color: #d4a94e;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.revenue-export-btn:hover {
+  border-color: #d4a94e;
 }
 
 .header-links {
