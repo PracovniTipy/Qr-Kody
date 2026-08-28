@@ -21,6 +21,7 @@ export function VenueSettingsForm({ venue, onSaved }: Props) {
   const [gamesEnabled, setGamesEnabled] = useState(venue.games_enabled)
   const [city, setCity] = useState(venue.city ?? '')
   const [address, setAddress] = useState(venue.address ?? '')
+  const [openingHours, setOpeningHours] = useState(venue.opening_hours ?? '')
   const [listedPublicly, setListedPublicly] = useState(venue.listed_publicly)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -42,6 +43,7 @@ export function VenueSettingsForm({ venue, onSaved }: Props) {
         games_enabled: gamesEnabled,
         city: city.trim() || null,
         address: address.trim() || null,
+        opening_hours: openingHours.trim() || null,
         listed_publicly: listedPublicly,
       })
       .eq('id', venue.id)
@@ -115,6 +117,14 @@ export function VenueSettingsForm({ venue, onSaved }: Props) {
         value={address}
         onChange={(e) => setAddress(e.target.value)}
         placeholder="Lipová 12"
+      />
+
+      <label htmlFor="venue-opening-hours">Otevírací doba (pro mapu podniků, nepovinné)</label>
+      <input
+        id="venue-opening-hours"
+        value={openingHours}
+        onChange={(e) => setOpeningHours(e.target.value)}
+        placeholder="Po-Pá 11-23, So-Ne 12-22"
       />
 
       <label className="checkbox-row">
