@@ -73,6 +73,9 @@ export function VenuePreviewPage() {
             {[preview.venue.address, preview.venue.city].filter(Boolean).join(', ')}
           </p>
         )}
+        {preview.venue.opening_hours && (
+          <p className="venue-directory-hours">{preview.venue.opening_hours}</p>
+        )}
         <p className="venue-preview-hint">
           Náhled menu. Objednávat a hrát jde jen naskenováním QR kódu na stole v podniku.
         </p>

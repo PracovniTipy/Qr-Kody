@@ -56,6 +56,9 @@ export function VenueMapPage() {
                   {[v.address, v.city].filter(Boolean).join(', ')}
                 </span>
               )}
+              {v.opening_hours && (
+                <span className="venue-directory-hours">{v.opening_hours}</span>
+              )}
             </Link>
           </li>
         ))}
