@@ -138,7 +138,12 @@ zkontrolovat/upravit a teprve pak publikovat do menu hospody, viz kapitola
 - počítá se ze zaplacených objednávek (`orders.paid = true`, viz QR platba
   výše) — čtení jde přímo přes Supabase klienta, chrání to stejné RLS
   pravidlo `orders_select_staff` jako kuchyňská obrazovka (migrace 0005),
-  žádná nová migrace ani RPC funkce tu nebyla potřeba.
+  žádná nová migrace ani RPC funkce tu nebyla potřeba,
+- tlačítko "Stáhnout CSV" (viditelné jen pokud je za posledních 30 dní
+  aspoň jedna zaplacená objednávka) exportuje zobrazenou tabulku tržeb do
+  CSV souboru (dny, tržby, počet objednávek, řádek s celkovým součtem) pro
+  účetnictví — generuje se čistě na klientovi z už načtených dat, žádný
+  nový požadavek na server ani migrace.
 
 ## 3g) Co je hotové (Etapa 4 — arkádové hry)
 
