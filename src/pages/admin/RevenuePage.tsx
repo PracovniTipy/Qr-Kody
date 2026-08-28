@@ -16,6 +16,36 @@ interface DayRevenue {
 
 const DAYS_BACK = 30
 
+function csvEscape(value: string): string {
+  if (/[";\n]/.test(value)) {
+    return `"${value.replace(/"/g, '""')}"`
+  }
+  return value
+}
+
+function buildRevenueCsv(days: DayRevenue[]): string {
+  const header = ['Den', 'Datum', 'Tržby (Kč)', 'Objednávky']
+  const rows = days.map((d) => [d.label, d.date, String(d.total), String(d.count)])
+  const totalAll = days.reduce((sum, d) => sum + d.total, 0)
+  const countAll = days.reduce((sum, d) => sum + d.count, 0)
+  const lines = [header, ...rows, ['Celkem', '', String(totalAll), String(countAll)]]
+  return lines.map((line) => line.map(csvEscape).join(';')).join('\r\n')
+}
+
+function downloadCsv(days: DayRevenue[]) {
+  const csv = '﻿' + buildRevenueCsv(days)
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const todayKey = new Date().toLocaleDateString('sv-SE')
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `trzby-${todayKey}.csv`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
 /**
  * Etapa 2 (část): přehled tržeb pro personál/majitele. Počítá se ze
  * zaplacených objednávek (orders.paid = true, viz PaymentPanel a migrace
@@ -109,6 +139,11 @@ export function RevenuePage() {
           </Link>
           <h1>Tržby</h1>
         </div>
+        {days.length > 0 && (
+          <button type="button" className="revenue-export-btn" onClick={() => downloadCsv(days)}>
+            Stáhnout CSV
+          </button>
+        )}
       </header>
 
       <div className="revenue-summary">
