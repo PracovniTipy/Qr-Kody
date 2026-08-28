@@ -9,6 +9,7 @@ export interface VenueRow {
   games_enabled: boolean
   city: string | null
   address: string | null
+  opening_hours: string | null
   listed_publicly: boolean
 }
 

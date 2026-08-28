@@ -8,6 +8,7 @@ export interface PublicVenue {
   name: string
   city: string | null
   address: string | null
+  opening_hours: string | null
 }
 
 export interface VenuePreview {
@@ -15,6 +16,7 @@ export interface VenuePreview {
     name: string
     city: string | null
     address: string | null
+    opening_hours: string | null
   }
   menu: MenuCategory[]
 }
