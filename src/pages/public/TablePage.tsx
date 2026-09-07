@@ -58,7 +58,7 @@ export function TablePage() {
   }, [venueSlug, tableToken])
 
   useEffect(() => {
-    if (!tableToken || status !== 'ok') return
+    if (!tableToken || status !== 'ok' || !context?.venue.ordering_enabled) return
 
     let active = true
 
@@ -72,7 +72,7 @@ export function TablePage() {
     return () => {
       active = false
     }
-  }, [tableToken, status])
+  }, [tableToken, status, context])
 
   useEffect(() => {
     if (!tableToken || status !== 'ok') return
@@ -237,28 +237,32 @@ export function TablePage() {
         </div>
       )}
 
-      <OrdersList orders={orders} />
+      {context.venue.ordering_enabled && (
+        <>
+          <OrdersList orders={orders} />
 
-      <PaymentPanel
-        amount={unpaidTotal}
-        bankAccount={context.venue.bank_account}
-        venueName={context.venue.name}
-        tableLabel={context.table.label}
-      />
+          <PaymentPanel
+            amount={unpaidTotal}
+            bankAccount={context.venue.bank_account}
+            venueName={context.venue.name}
+            tableLabel={context.table.label}
+          />
 
-      <MenuList categories={context.menu} quantities={quantities} onQuantityChange={setQuantity} />
+          <MenuList categories={context.menu} quantities={quantities} onQuantityChange={setQuantity} />
 
-      {submitError && <p className="error cart-error">{submitError}</p>}
+          {submitError && <p className="error cart-error">{submitError}</p>}
 
-      {cartCount > 0 && (
-        <div className="cart-bar">
-          <div>
-            <strong>{cartCount}×</strong> v košíku · {cartTotal} Kč
-          </div>
-          <button type="button" onClick={handleSubmitOrder} disabled={submitting}>
-            {submitting ? 'Odesílám…' : 'Odeslat objednávku'}
-          </button>
-        </div>
+          {cartCount > 0 && (
+            <div className="cart-bar">
+              <div>
+                <strong>{cartCount}×</strong> v košíku · {cartTotal} Kč
+              </div>
+              <button type="button" onClick={handleSubmitOrder} disabled={submitting}>
+                {submitting ? 'Odesílám…' : 'Odeslat objednávku'}
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   )
