@@ -25,6 +25,7 @@ export interface TableContext {
     name: string
     bank_account: string | null
     games_enabled: boolean
+    ordering_enabled: boolean
   }
   table: {
     label: string
