@@ -52,6 +52,11 @@ body {
   color: #e0665a;
 }
 
+.hint-warning {
+  color: #d4a94e;
+  font-size: 0.85rem;
+}
+
 .dashboard {
   max-width: 720px;
   margin: 0 auto;
@@ -315,6 +320,12 @@ button.danger {
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+}
+
+.tables-bulk-hint {
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: #a9a29a;
 }
 
 .item-edit-form {
