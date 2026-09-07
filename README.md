@@ -281,6 +281,29 @@ se v adresáři i na náhledu menu. Jde jen o informační text pro hosty,
 žádná logika "otevřeno teď" se z něj nepočítá (u volného formátu by to
 stejně nešlo spolehlivě vyhodnotit).
 
+## 3n) Co je hotové (objednávání jako nezávislý přepínač + rychlejší přidávání stolů)
+
+Hry (`games_enabled`, migrace 0020) a objednávání jídla a pití teď jdou
+zapnout/vypnout úplně nezávisle na sobě přes nové pole `ordering_enabled`
+(migrace 0028, výchozí `true` — chování stávajících hospod se nezměnilo).
+V Nastavení hospody jsou to dva samostatné přepínače. Když je objednávání
+vypnuté, `get_table_context` to hostovi pošle a `TablePage.tsx` rovnou
+nezobrazí menu, košík ani přehled objednávek — a `submit_order` to navíc
+nezávisle ověří i na serveru a odeslání objednávky odmítne (stejný vzor
+jako vynucení `games_enabled` v migraci 0022), takže vypnutí není jen
+kosmetické schování tlačítka. Díky tomu appka umí fungovat jako čistě
+"herní stůl" bez objednávání, čistě jako restaurační objednávkový systém
+bez her, nebo obojí najednou — podle toho, co si hospoda zapne.
+
+Přidávání stolů (`TablesManager.tsx`, admin stránka hospody) je teď
+rychlejší: pole pro označení stolu se samo předvyplní dalším volným číslem
+(hledá se nejvyšší dosavadní číselný štítek + 1, textové štítky jako "Bar"
+nevadí), takže admin může jen opakovaně mačkat "Přidat stůl". Navíc
+přibylo hromadné přidání — zadá se počet a appka založí tolik stolů
+najednou, očíslovaných postupně od dalšího volného čísla (jeden `insert`
+s polem řádků). Užitečné hlavně při zakládání nové hospody s desítkami
+stolů, aby se nemusely přidávat jednotlivě.
+
 ## 4) Co záměrně chybí (přijde v dalších etapách)
 
 Masterplán (kapitola 7/11) je teď na úrovni MVP kompletní (arkádové i
