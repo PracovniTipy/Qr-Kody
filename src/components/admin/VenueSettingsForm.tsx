@@ -18,6 +18,7 @@ export function VenueSettingsForm({ venue, onSaved }: Props) {
   const [slug, setSlug] = useState(venue.slug)
   const [isActive, setIsActive] = useState(venue.is_active)
   const [bankAccount, setBankAccount] = useState(venue.bank_account ?? '')
+  const [orderingEnabled, setOrderingEnabled] = useState(venue.ordering_enabled)
   const [gamesEnabled, setGamesEnabled] = useState(venue.games_enabled)
   const [city, setCity] = useState(venue.city ?? '')
   const [address, setAddress] = useState(venue.address ?? '')
@@ -40,6 +41,7 @@ export function VenueSettingsForm({ venue, onSaved }: Props) {
         slug,
         is_active: isActive,
         bank_account: bankAccount.trim() || null,
+        ordering_enabled: orderingEnabled,
         games_enabled: gamesEnabled,
         city: city.trim() || null,
         address: address.trim() || null,
@@ -91,6 +93,15 @@ export function VenueSettingsForm({ venue, onSaved }: Props) {
         Hospoda je aktivní (jinak QR kódy stolů přestanou fungovat)
       </label>
 
+      <label className="checkbox-row">
+        <input
+          type="checkbox"
+          checked={orderingEnabled}
+          onChange={(e) => setOrderingEnabled(e.target.checked)}
+        />
+        Objednávání jídla a pití – zobrazit hostům menu a umožnit odeslat objednávku ke stolu
+      </label>
+
       <label htmlFor="venue-bank-account">IBAN (pro QR platbu hostům, nepovinné)</label>
       <input
         id="venue-bank-account"
@@ -105,8 +116,16 @@ export function VenueSettingsForm({ venue, onSaved }: Props) {
           checked={gamesEnabled}
           onChange={(e) => setGamesEnabled(e.target.checked)}
         />
-        Hry u stolu (příplatková služba 299 Kč/měsíc) – zobrazit hostům na stránce stolu
+        Hry u stolu (příplatková služba 299 Kč/měsíc) – zobrazit hostům na stránce stolu,
+        nezávisle na objednávání
       </label>
+
+      {!orderingEnabled && !gamesEnabled && (
+        <p className="hint-warning">
+          Bez objednávání i her nebude mít host na stránce stolu skoro nic k dispozici –
+          zapni aspoň jedno z toho.
+        </p>
+      )}
 
       <label htmlFor="venue-city">Město (pro mapu podniků, nepovinné)</label>
       <input id="venue-city" value={city} onChange={(e) => setCity(e.target.value)} placeholder="Praha" />

@@ -10,6 +10,18 @@ interface Props {
   onChange: (tables: TableRow[]) => void
 }
 
+// Najde nejvyšší čistě číselné označení stolu a vrátí další volné číslo jako
+// text (např. při stolech "1", "2", "Bar" vrátí "3"). Usnadňuje přidávání
+// stolů – admin nemusí sám vymýšlet a psát další číslo.
+function nextTableNumber(rows: TableRow[]): string {
+  let max = 0
+  for (const row of rows) {
+    const n = Number(row.label)
+    if (Number.isInteger(n) && n > max) max = n
+  }
+  return String(max + 1)
+}
+
 /**
  * Stoly a jejich QR odkazy. qr_token generuje databáze sama (viz sloupec
  * tables.qr_token v migraci 0001), takže admin jen zadá popisek stolu.
@@ -20,9 +32,12 @@ interface Props {
  * 0007) – čtení i zápis chrání stejné RLS jako zbytek téhle stránky.
  */
 export function TablesManager({ venueId, venueSlug, tables, onChange }: Props) {
-  const [label, setLabel] = useState('')
+  const [label, setLabel] = useState(() => nextTableNumber(tables))
   const [adding, setAdding] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [bulkCount, setBulkCount] = useState('')
+  const [bulkAdding, setBulkAdding] = useState(false)
+  const [bulkError, setBulkError] = useState<string | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [unpaidTotals, setUnpaidTotals] = useState<Record<string, number>>({})
 
@@ -90,8 +105,43 @@ export function TablesManager({ venueId, venueSlug, tables, onChange }: Props) {
       return
     }
 
-    onChange([...tables, data as TableRow])
-    setLabel('')
+    const merged = [...tables, data as TableRow]
+    onChange(merged)
+    setLabel(nextTableNumber(merged))
+  }
+
+  async function handleBulkAdd(e: FormEvent) {
+    e.preventDefault()
+    const count = Math.floor(Number(bulkCount))
+    if (!Number.isInteger(count) || count < 1) return
+    const capped = Math.min(count, 100)
+
+    setBulkAdding(true)
+    setBulkError(null)
+
+    const start = Number(nextTableNumber(tables))
+    const rows = Array.from({ length: capped }, (_, i) => ({
+      venue_id: venueId,
+      label: String(start + i),
+    }))
+
+    const { data, error: insertError } = await supabase.from('tables').insert(rows).select()
+
+    setBulkAdding(false)
+
+    if (insertError) {
+      setBulkError(
+        insertError.code === '23505'
+          ? 'Některý z těchto stolů už existuje.'
+          : insertError.message
+      )
+      return
+    }
+
+    const merged = [...tables, ...((data ?? []) as TableRow[])]
+    onChange(merged)
+    setLabel(nextTableNumber(merged))
+    setBulkCount('')
   }
 
   async function toggleActive(t: TableRow) {
@@ -230,6 +280,24 @@ export function TablesManager({ venueId, venueSlug, tables, onChange }: Props) {
         </button>
       </form>
       {error && <p className="error">{error}</p>}
+
+      <form className="inline-form" onSubmit={handleBulkAdd}>
+        <input
+          type="number"
+          min={1}
+          max={100}
+          placeholder="Kolik stolů přidat najednou, např. 10"
+          value={bulkCount}
+          onChange={(e) => setBulkCount(e.target.value)}
+        />
+        <button type="submit" disabled={bulkAdding || !bulkCount}>
+          {bulkAdding ? 'Přidávám…' : 'Přidat více stolů'}
+        </button>
+      </form>
+      <p className="tables-bulk-hint">
+        Očísluje je postupně od {nextTableNumber(tables)} výš – vhodné při zakládání nové hospody.
+      </p>
+      {bulkError && <p className="error">{bulkError}</p>}
     </div>
   )
 }
