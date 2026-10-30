@@ -8,6 +8,10 @@ import { ActiveTournament } from '../../types/tournament'
 import { MenuList } from '../../components/MenuList'
 import { OrdersList } from '../../components/OrdersList'
 import { PaymentPanel } from '../../components/PaymentPanel'
+import { OfflineBanner } from '../../components/OfflineBanner'
+import { useOnlineStatus } from '../../hooks/useOnlineStatus'
+import { cacheTableContext, readCachedTableContext } from '../../lib/offlineTableContext'
+import { enqueueOrder, flushOrderQueue, getQueueForTable } from '../../lib/offlineOrderQueue'
 
 /**
  * Veřejná stránka stolu: app.cz/v/:venueSlug/t/:tableToken
@@ -20,9 +24,16 @@ import { PaymentPanel } from '../../components/PaymentPanel'
  * přímo. Kuchyňská obrazovka (KitchenPage) a QR platba (PaymentPanel) jsou taky
  * hotové, stejně jako přehled tržeb. Přidána i první arkádová hra (Etapa 4) –
  * odkaz "Hrát" vede na GamePage. Zbytek her a další kapitoly viz masterplán.
+ *
+ * Etapa 5 (spolehlivost, "funguje bez wifi"): kontext stolu se při úspěšném
+ * načtení uloží do localStorage (offlineTableContext) a při výpadku
+ * připojení se použije místo chybové stránky – host dál vidí menu. Odeslání
+ * objednávky bez připojení (nebo při síťové chybě) jde do lokální fronty
+ * (offlineOrderQueue) a odešle se automaticky po návratu připojení.
  */
 export function TablePage() {
   const { venueSlug, tableToken } = useParams<{ venueSlug: string; tableToken: string }>()
+  const isOnline = useOnlineStatus()
   const [context, setContext] = useState<TableContext | null>(null)
   const [status, setStatus] = useState<'loading' | 'ok' | 'not_found' | 'error'>('loading')
   const [quantities, setQuantities] = useState<Record<string, number>>({})
@@ -31,6 +42,7 @@ export function TablePage() {
   const [activeTournaments, setActiveTournaments] = useState<ActiveTournament[]>([])
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [pendingCount, setPendingCount] = useState(0)
 
   useEffect(() => {
     if (!venueSlug || !tableToken) {
@@ -45,17 +57,75 @@ export function TablePage() {
       .then(({ data, error }) => {
         if (!active) return
         if (error || !data) {
+          // Síťová chyba (appka je offline, nebo Supabase chvilkově neodpovídá)
+          // – zkusíme poslední známý stav téhle stránky stolu z localStorage,
+          // ať host dál vidí menu místo chybové hlášky.
+          const cached = error ? readCachedTableContext(tableToken!) : null
+          if (cached) {
+            setContext(cached)
+            setStatus('ok')
+            return
+          }
           setStatus(error ? 'error' : 'not_found')
           return
         }
         setContext(data as TableContext)
+        cacheTableContext(tableToken!, data as TableContext)
         setStatus('ok')
+      })
+      .catch(() => {
+        if (!active) return
+        const cached = readCachedTableContext(tableToken!)
+        if (cached) {
+          setContext(cached)
+          setStatus('ok')
+        } else {
+          setStatus('error')
+        }
       })
 
     return () => {
       active = false
     }
   }, [venueSlug, tableToken])
+
+  // Fronta čekajících objednávek pro tenhle stůl – pro zobrazení v banneru.
+  useEffect(() => {
+    if (!tableToken) return
+
+    function refresh() {
+      setPendingCount(getQueueForTable(tableToken!).length)
+    }
+
+    refresh()
+    window.addEventListener('stulhraje:order-queue-changed', refresh)
+    return () => window.removeEventListener('stulhraje:order-queue-changed', refresh)
+  }, [tableToken])
+
+  // Jakmile je appka online a ve frontě něco čeká, zkusí se to odeslat –
+  // hned při návratu připojení a pak pravidelně (pro jistotu, kdyby
+  // 'online' event nespolehlivě vystřelil, např. za firemním/hospodským wifi).
+  useEffect(() => {
+    if (!isOnline || !tableToken) return
+
+    let cancelled = false
+
+    async function tryFlush() {
+      const { sent } = await flushOrderQueue()
+      if (cancelled) return
+      if (sent > 0) {
+        const { data: refreshed } = await supabase.rpc('get_table_orders', { p_qr_token: tableToken! })
+        if (!cancelled && Array.isArray(refreshed)) setOrders(refreshed as OrderSummary[])
+      }
+    }
+
+    tryFlush()
+    const interval = setInterval(tryFlush, 20000)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+    }
+  }, [isOnline, tableToken])
 
   useEffect(() => {
     if (!tableToken || status !== 'ok' || !context?.venue.ordering_enabled) return
@@ -134,27 +204,55 @@ export function TablePage() {
     .filter((o) => o.status !== 'zrusena' && !o.paid)
     .reduce((sum, o) => sum + o.items.reduce((s, it) => s + it.price_czk * it.quantity, 0), 0)
 
+  function isNetworkErrorMessage(message: string) {
+    const m = message.toLowerCase()
+    return m.includes('failed to fetch') || m.includes('network') || m.includes('load failed')
+  }
+
   async function handleSubmitOrder() {
     if (!tableToken || cartLines.length === 0) return
+
+    const items = cartLines.map((line) => ({ menu_item_id: line.item.id, quantity: line.quantity }))
+
+    // Offline rovnou do fronty, ani nezkoušíme síť – ušetří to hostovi
+    // čekání na timeout a objednávka se stejně odešle, jen později.
+    if (!navigator.onLine) {
+      enqueueOrder(tableToken, items, null)
+      setQuantities({})
+      setSubmitError(null)
+      return
+    }
 
     setSubmitting(true)
     setSubmitError(null)
 
     try {
-      const items = cartLines.map((line) => ({ menu_item_id: line.item.id, quantity: line.quantity }))
       const { error } = await supabase.rpc('submit_order', {
         p_qr_token: tableToken,
         p_items: items,
         p_note: null,
       })
-      if (error) throw new Error(error.message)
+      if (error) {
+        if (isNetworkErrorMessage(error.message)) {
+          enqueueOrder(tableToken, items, null)
+          setQuantities({})
+          return
+        }
+        throw new Error(error.message)
+      }
 
       setQuantities({})
 
       const { data: refreshed } = await supabase.rpc('get_table_orders', { p_qr_token: tableToken })
       if (Array.isArray(refreshed)) setOrders(refreshed as OrderSummary[])
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : 'Objednávku se nepodařilo odeslat.')
+      const message = err instanceof Error ? err.message : 'Objednávku se nepodařilo odeslat.'
+      if (isNetworkErrorMessage(message)) {
+        enqueueOrder(tableToken, items, null)
+        setQuantities({})
+        return
+      }
+      setSubmitError(message)
     } finally {
       setSubmitting(false)
     }
@@ -182,6 +280,7 @@ export function TablePage() {
 
   return (
     <div className="table-page">
+      <OfflineBanner isOnline={isOnline} pendingCount={pendingCount} />
       <header className="table-header">
         <h1>{context.venue.name}</h1>
         <p>Stůl {context.table.label}</p>
@@ -258,7 +357,7 @@ export function TablePage() {
                 <strong>{cartCount}×</strong> v košíku · {cartTotal} Kč
               </div>
               <button type="button" onClick={handleSubmitOrder} disabled={submitting}>
-                {submitting ? 'Odesílám…' : 'Odeslat objednávku'}
+                {submitting ? 'Odesílám…' : isOnline ? 'Odeslat objednávku' : 'Odeslat (offline – doručí se později)'}
               </button>
             </div>
           )}
