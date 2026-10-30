@@ -304,14 +304,56 @@ najednou, očíslovaných postupně od dalšího volného čísla (jeden `insert
 s polem řádků). Užitečné hlavně při zakládání nové hospody s desítkami
 stolů, aby se nemusely přidávat jednotlivě.
 
+## 3o) Co je hotové (Etapa 5 — spolehlivost a provoz bez wifi, část)
+
+První krok k appce, co "nikdy nespadne a funguje bez wifi" (vize rozdělení
+na samostatné appky — hospody / univerzální QR generátor / hry — viz
+diskuze s majitelem; zatím zůstáváme v jednom repozitáři a appku postupně
+zpevňujeme):
+
+- **ErrorBoundary** (`src/components/ErrorBoundary.tsx`, obaluje `<App />`
+  v `main.tsx`) — neošetřená chyba při renderu (např. neočekávaný tvar dat
+  po výpadku) už nezhodí celou appku na bílou obrazovku, ale zobrazí
+  přívětivou hlášku s tlačítkem na obnovení.
+- **Offline fronta objednávek** (`src/lib/offlineOrderQueue.ts`) — když
+  host odešle objednávku bez připojení (nebo appka narazí na síťovou
+  chybu uprostřed odesílání), objednávka se uloží do `localStorage` místo
+  chybové hlášky a automaticky se odešle přes `submit_order`, jakmile se
+  připojení vrátí (kontrola hned po návratu online i pravidelně po 20 s
+  pro jistotu). Business chyby ze serveru (např. vypnuté objednávání) se
+  do fronty nezařazují, jen skutečné síťové výpadky.
+- **Cache kontextu stolu** (`src/lib/offlineTableContext.ts`) — po
+  úspěšném načtení `get_table_context` se výsledek uloží do
+  `localStorage`; při dalším načtení stránky bez připojení appka použije
+  poslední známý stav (menu, info o hospodě) místo "Stůl nenalezen".
+  Neřeší to nejvzácnější hraniční případ, kdy požadavek dolétne na server,
+  ale odpověď se ztratí — na to by bylo potřeba idempotenční klíč přímo v
+  `submit_order`, což je nad rámec téhle první fáze.
+- **`OfflineBanner`** — hostovi na stránce stolu ukáže, že appka běží
+  offline a kolik objednávek čeká na odeslání.
+- **Opravené PWA ikony** — `public/icon-192.png`, `public/icon-512.png` a
+  `public/favicon.svg` ve skutečnosti v repozitáři chyběly (i když na ně
+  `vite.config.ts` odkazoval), takže appka v produkci na `/icon-192.png`
+  vracela 200 s HTML stránkou místo obrázku a "Přidat na plochu" fungovalo
+  jen napůl. Teď jsou tam skutečné PNG/SVG soubory v barvách appky.
+
+Záměrně vynechané: přivolání obsluhy (host to v debatě o appce #1
+vyloučil — "zbytečné"), plný offline provoz appky samotné bez jediného
+předchozího online načtení (aktuálně appku musí host otevřít aspoň jednou
+s připojením, aby měl co cachovat) a idempotence `submit_order` proti
+zdvojení objednávky při ztrátě odpovědi ze serveru.
+
 ## 4) Co záměrně chybí (přijde v dalších etapách)
 
 Masterplán (kapitola 7/11) je teď na úrovni MVP kompletní (arkádové i
-stolní hry). Chybí ale vše ostatní z masterplánu: partnerský program a
-hráčské účty (kapitola 9 — s tím souvisí i to, že vynucení příplatkové
+stolní hry). Appka se navíc do budoucna rozdělí na tři samostatné appky
+(hospody / univerzální QR generátor na libovolný obsah / hry — každá hra
+zvlášť) — zatím jen jako dohodnutá vize, reálně se zatím pracuje jen na
+zpevňování appky #1 (hospody). Z masterplánu dál chybí: partnerský program
+a hráčské účty (kapitola 9 — s tím souvisí i to, že vynucení příplatkové
 služby za hry zatím nemá skutečnou fakturaci/platební bránu), a pilotní
-test (Etapa 5) u reálné hospody. Podle pravidel pro vývoj (kapitola 13) se
-nemá programovat všechno najednou.
+test u reálné hospody. Podle pravidel pro vývoj (kapitola 13) se nemá
+programovat všechno najednou.
 
 ## 5) Nasazení
 
