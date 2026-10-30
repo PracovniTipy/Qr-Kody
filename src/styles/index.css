@@ -76,6 +76,35 @@ body {
   padding-bottom: 96px;
 }
 
+.offline-banner {
+  background: #2a230f;
+  border: 1px solid #4a3c1a;
+  color: #e7c878;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.crash-fallback {
+  max-width: 420px;
+  margin: 48px auto;
+  padding: 24px;
+  text-align: center;
+}
+
+.crash-fallback button {
+  margin-top: 12px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background: #d4a94e;
+  color: #171a20;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .table-header {
   text-align: center;
   padding: 16px 0 24px;
