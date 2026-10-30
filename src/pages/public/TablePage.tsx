@@ -51,16 +51,21 @@ export function TablePage() {
     }
 
     let active = true
+    const resolvedVenueSlug = venueSlug
+    const resolvedTableToken = tableToken
 
-    supabase
-      .rpc('get_table_context', { p_venue_slug: venueSlug, p_table_token: tableToken })
-      .then(({ data, error }) => {
+    async function load() {
+      try {
+        const { data, error } = await supabase.rpc('get_table_context', {
+          p_venue_slug: resolvedVenueSlug,
+          p_table_token: resolvedTableToken,
+        })
         if (!active) return
         if (error || !data) {
           // Síťová chyba (appka je offline, nebo Supabase chvilkově neodpovídá)
           // – zkusíme poslední známý stav téhle stránky stolu z localStorage,
           // ať host dál vidí menu místo chybové hlášky.
-          const cached = error ? readCachedTableContext(tableToken!) : null
+          const cached = error ? readCachedTableContext(resolvedTableToken) : null
           if (cached) {
             setContext(cached)
             setStatus('ok')
@@ -70,19 +75,21 @@ export function TablePage() {
           return
         }
         setContext(data as TableContext)
-        cacheTableContext(tableToken!, data as TableContext)
+        cacheTableContext(resolvedTableToken, data as TableContext)
         setStatus('ok')
-      })
-      .catch(() => {
+      } catch {
         if (!active) return
-        const cached = readCachedTableContext(tableToken!)
+        const cached = readCachedTableContext(resolvedTableToken)
         if (cached) {
           setContext(cached)
           setStatus('ok')
         } else {
           setStatus('error')
         }
-      })
+      }
+    }
+
+    load()
 
     return () => {
       active = false
