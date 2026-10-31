@@ -149,15 +149,15 @@ body {
   margin: 0;
 }
 
-/* --- Vícejazyčné menu (masterplán, "co zbývá") --- */
-.menu-lang-toggle {
+/* --- Globální přepínač jazyka CS/EN (celá appka, všechny hry) --- */
+.lang-toggle {
   display: flex;
   justify-content: center;
   gap: 8px;
   margin-bottom: 16px;
 }
 
-.menu-lang-toggle button {
+.lang-toggle button {
   background: #2a2f3a;
   color: #f2ede6;
   border: 1px solid #2a2f3a;
@@ -168,7 +168,7 @@ body {
   cursor: pointer;
 }
 
-.menu-lang-toggle button.active {
+.lang-toggle button.active {
   background: #d4a94e;
   border-color: #d4a94e;
   color: #171a20;
