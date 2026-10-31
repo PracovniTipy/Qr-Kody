@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import { useLanguage } from './lib/language'
 import { AdminLoginPage } from './pages/admin/AdminLoginPage'
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage'
@@ -24,6 +24,9 @@ import { RateVenuePage } from './pages/public/RateVenuePage'
 import { TournamentsPage } from './pages/public/TournamentsPage'
 import { VenueMapPage } from './pages/public/VenueMapPage'
 import { VenuePreviewPage } from './pages/public/VenuePreviewPage'
+import { HomePage } from './pages/public/HomePage'
+import { ScanPage } from './pages/public/ScanPage'
+import { AppDownloadPage } from './pages/public/AppDownloadPage'
 
 function NotFoundPage() {
   const { lang } = useLanguage()
@@ -33,7 +36,9 @@ function NotFoundPage() {
 export function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/admin" replace />} />
+      <Route path="/" element={<HomePage />} />
+      <Route path="/skenovat" element={<ScanPage />} />
+      <Route path="/aplikace" element={<AppDownloadPage />} />
       <Route path="/podniky" element={<VenueMapPage />} />
 
       <Route path="/admin/login" element={<AdminLoginPage />} />
