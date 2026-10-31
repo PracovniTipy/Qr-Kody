@@ -137,7 +137,7 @@ export function TournamentsAdminPage() {
           <select value={gameId} onChange={(e) => setGameId(e.target.value)}>
             {Object.entries(SCORE_GAME_LABELS).map(([id, label]) => (
               <option key={id} value={id}>
-                {label}
+                {label.cs}
               </option>
             ))}
           </select>
