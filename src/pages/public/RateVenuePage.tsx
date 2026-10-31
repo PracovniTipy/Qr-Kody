@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabaseClient'
 import { SubmitRatingResult } from '../../types/rating'
+import { LanguageSwitcher } from '../../components/LanguageSwitcher'
+import { useLanguage } from '../../lib/language'
 
 const STORAGE_PREFIX = 'rated_venue_'
 
@@ -16,6 +18,7 @@ const STORAGE_PREFIX = 'rated_venue_'
  */
 export function RateVenuePage() {
   const { venueSlug, tableToken } = useParams<{ venueSlug: string; tableToken: string }>()
+  const { lang } = useLanguage()
   const [stars, setStars] = useState(0)
   const [comment, setComment] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -36,6 +39,8 @@ export function RateVenuePage() {
     setSubmitting(true)
     setError(null)
 
+    const failMessage = lang === 'en' ? "Couldn't send the rating. Try again." : 'Hodnocení se nepodařilo odeslat. Zkus to znovu.'
+
     try {
       const { data } = await supabase.rpc('submit_venue_rating', {
         p_qr_token: tableToken,
@@ -44,7 +49,7 @@ export function RateVenuePage() {
       })
       const result = data as SubmitRatingResult | null
       if (!result?.ok) {
-        setError('Hodnocení se nepodařilo odeslat. Zkus to znovu.')
+        setError(failMessage)
         setSubmitting(false)
         return
       }
@@ -55,7 +60,7 @@ export function RateVenuePage() {
       }
       setDone(true)
     } catch {
-      setError('Hodnocení se nepodařilo odeslat. Zkus to znovu.')
+      setError(failMessage)
     }
     setSubmitting(false)
   }
@@ -63,19 +68,20 @@ export function RateVenuePage() {
   return (
     <div className="game-page rate-venue-page">
       <header>
+        <LanguageSwitcher />
         <Link to={`/v/${venueSlug ?? ''}/t/${tableToken ?? ''}`} className="back-link">
-          ← Zpět ke stolu
+          {lang === 'en' ? '← Back to table' : '← Zpět ke stolu'}
         </Link>
-        <h1>⭐ Ohodnoť podnik</h1>
+        <h1>{lang === 'en' ? '⭐ Rate this place' : '⭐ Ohodnoť podnik'}</h1>
       </header>
 
       {done ? (
         <div className="rate-venue-thanks">
-          <p>Díky za hodnocení! 🙌</p>
+          <p>{lang === 'en' ? 'Thanks for rating! 🙌' : 'Díky za hodnocení! 🙌'}</p>
         </div>
       ) : (
         <div className="rate-venue-form">
-          <p>Jak se ti tu dneska líbilo?</p>
+          <p>{lang === 'en' ? 'How did you like it here today?' : 'Jak se ti tu dneska líbilo?'}</p>
 
           <div className="rate-venue-stars">
             {[1, 2, 3, 4, 5].map((n) => (
@@ -84,7 +90,7 @@ export function RateVenuePage() {
                 type="button"
                 className={`rate-venue-star ${n <= stars ? 'filled' : ''}`}
                 onClick={() => setStars(n)}
-                aria-label={`${n} z 5 hvězdiček`}
+                aria-label={lang === 'en' ? `${n} of 5 stars` : `${n} z 5 hvězdiček`}
               >
                 {n <= stars ? '★' : '☆'}
               </button>
@@ -93,7 +99,7 @@ export function RateVenuePage() {
 
           <textarea
             className="rate-venue-comment"
-            placeholder="Chceš k tomu něco dodat? (nepovinné)"
+            placeholder={lang === 'en' ? 'Want to add anything? (optional)' : 'Chceš k tomu něco dodat? (nepovinné)'}
             value={comment}
             maxLength={500}
             onChange={(e) => setComment(e.target.value)}
@@ -107,7 +113,7 @@ export function RateVenuePage() {
             onClick={submit}
             disabled={stars < 1 || submitting}
           >
-            {submitting ? 'Odesílám…' : 'Odeslat hodnocení'}
+            {submitting ? (lang === 'en' ? 'Sending…' : 'Odesílám…') : lang === 'en' ? 'Send rating' : 'Odeslat hodnocení'}
           </button>
         </div>
       )}

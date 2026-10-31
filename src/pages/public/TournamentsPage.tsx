@@ -3,6 +3,8 @@ import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabaseClient'
 import { gameLabel } from '../../lib/gameLabels'
 import { ActiveTournament, TournamentLeaderboardResult } from '../../types/tournament'
+import { LanguageSwitcher } from '../../components/LanguageSwitcher'
+import { useLanguage } from '../../lib/language'
 
 /**
  * Turnaje (masterplán, "co zbývá": turnaje) - veřejná stránka pro hosty.
@@ -13,6 +15,7 @@ import { ActiveTournament, TournamentLeaderboardResult } from '../../types/tourn
  */
 export function TournamentsPage() {
   const { venueSlug, tableToken } = useParams<{ venueSlug: string; tableToken: string }>()
+  const { lang } = useLanguage()
   const [tournaments, setTournaments] = useState<ActiveTournament[]>([])
   const [boards, setBoards] = useState<Record<string, TournamentLeaderboardResult>>({})
   const [status, setStatus] = useState<'loading' | 'ok' | 'error'>('loading')
@@ -56,17 +59,24 @@ export function TournamentsPage() {
   return (
     <div className="game-page tournaments-page">
       <header>
+        <LanguageSwitcher />
         <Link to={`/v/${venueSlug ?? ''}/t/${tableToken ?? ''}`} className="back-link">
-          ← Zpět ke stolu
+          {lang === 'en' ? '← Back to table' : '← Zpět ke stolu'}
         </Link>
-        <h1>🏆 Turnaje</h1>
+        <h1>{lang === 'en' ? '🏆 Tournaments' : '🏆 Turnaje'}</h1>
       </header>
 
-      {status === 'loading' && <p>Načítám…</p>}
+      {status === 'loading' && <p>{lang === 'en' ? 'Loading…' : 'Načítám…'}</p>}
 
-      {status === 'error' && <p className="error">Turnaje se nepodařilo načíst. Zkus to znovu.</p>}
+      {status === 'error' && (
+        <p className="error">
+          {lang === 'en' ? "Couldn't load tournaments. Try again." : 'Turnaje se nepodařilo načíst. Zkus to znovu.'}
+        </p>
+      )}
 
-      {status === 'ok' && tournaments.length === 0 && <p>Momentálně tu neběží žádný turnaj.</p>}
+      {status === 'ok' && tournaments.length === 0 && (
+        <p>{lang === 'en' ? 'No tournament is running right now.' : 'Momentálně tu neběží žádný turnaj.'}</p>
+      )}
 
       {tournaments.map((t) => {
         const board = boards[t.id]
@@ -74,11 +84,12 @@ export function TournamentsPage() {
           <section key={t.id} className="leaderboard tournament-board">
             <h2>
               {t.name}
-              <span className="tournament-game-label"> — {gameLabel(t.game_id)}</span>
+              <span className="tournament-game-label"> — {gameLabel(t.game_id, lang)}</span>
             </h2>
             {t.ends_at && (
               <p className="tournament-ends-hint">
-                Končí {new Date(t.ends_at).toLocaleString('cs-CZ', {
+                {lang === 'en' ? 'Ends ' : 'Končí '}
+                {new Date(t.ends_at).toLocaleString(lang === 'en' ? 'en-GB' : 'cs-CZ', {
                   day: 'numeric',
                   month: 'numeric',
                   hour: '2-digit',
@@ -87,7 +98,7 @@ export function TournamentsPage() {
               </p>
             )}
             {!board || board.scores.length === 0 ? (
-              <p>Zatím žádné skóre.</p>
+              <p>{lang === 'en' ? 'No scores yet.' : 'Zatím žádné skóre.'}</p>
             ) : (
               <ol className="leaderboard-list">
                 {board.scores.map((entry, i) => (

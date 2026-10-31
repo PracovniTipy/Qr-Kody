@@ -9,6 +9,8 @@ import { MenuList } from '../../components/MenuList'
 import { OrdersList } from '../../components/OrdersList'
 import { PaymentPanel } from '../../components/PaymentPanel'
 import { OfflineBanner } from '../../components/OfflineBanner'
+import { LanguageSwitcher } from '../../components/LanguageSwitcher'
+import { useLanguage } from '../../lib/language'
 import { useOnlineStatus } from '../../hooks/useOnlineStatus'
 import { cacheTableContext, readCachedTableContext } from '../../lib/offlineTableContext'
 import { enqueueOrder, flushOrderQueue, getQueueForTable } from '../../lib/offlineOrderQueue'
@@ -30,9 +32,27 @@ import { enqueueOrder, flushOrderQueue, getQueueForTable } from '../../lib/offli
  * připojení se použije místo chybové stránky – host dál vidí menu. Odeslání
  * objednávky bez připojení (nebo při síťové chybě) jde do lokální fronty
  * (offlineOrderQueue) a odešle se automaticky po návratu připojení.
+ *
+ * Etapa 5b (dvojjazyčnost): veškerý text UI (ne jen menu) se řídí globálním
+ * přepínačem CS/EN – viz src/lib/language.tsx a <LanguageSwitcher />.
  */
+
+const GAME_LINKS: { to: string; cs: string; en: string }[] = [
+  { to: 'hra', cs: '🥕 Chytání surovin', en: '🥕 Catch the ingredients' },
+  { to: 'hra-let', cs: '🍺 Let mezi sudy', en: '🍺 Flight between barrels' },
+  { to: 'hra-beh', cs: '🏃 Hospodský běh', en: '🏃 Pub run' },
+  { to: 'hra-skok', cs: '🕺 Skákání nahoru', en: '🕺 Jump up' },
+  { to: 'hra-lahve', cs: '🍾 Rozbíjení lahví', en: '🍾 Bottle smash' },
+  { to: 'hra-prsi', cs: '🃏 Prší', en: "🃏 Crazy Eights" },
+  { to: 'hra-poker', cs: '♠️ Poker', en: '♠️ Poker' },
+  { to: 'hra-dama', cs: '⚫ Dáma', en: '⚫ Checkers' },
+  { to: 'hra-sachy', cs: '♞ Šachy', en: '♞ Chess' },
+  { to: 'hra-flaska', cs: '🍾 Flaška', en: '🍾 Spin the Bottle' },
+]
+
 export function TablePage() {
   const { venueSlug, tableToken } = useParams<{ venueSlug: string; tableToken: string }>()
+  const { lang } = useLanguage()
   const isOnline = useOnlineStatus()
   const [context, setContext] = useState<TableContext | null>(null)
   const [status, setStatus] = useState<'loading' | 'ok' | 'not_found' | 'error'>('loading')
@@ -259,19 +279,26 @@ export function TablePage() {
         setQuantities({})
         return
       }
-      setSubmitError(message)
+      setSubmitError(lang === 'en' ? 'Failed to send the order.' : message)
     } finally {
       setSubmitting(false)
     }
   }
 
-  if (status === 'loading') return <p style={{ padding: 24 }}>Načítám…</p>
+  if (status === 'loading') {
+    return <p style={{ padding: 24 }}>{lang === 'en' ? 'Loading…' : 'Načítám…'}</p>
+  }
 
   if (status === 'not_found') {
     return (
       <div style={{ padding: 24 }}>
-        <h1>Stůl nenalezen</h1>
-        <p>Tenhle QR kód neodpovídá žádné aktivní hospodě nebo stolu. Zkus obsluhu.</p>
+        <LanguageSwitcher />
+        <h1>{lang === 'en' ? 'Table not found' : 'Stůl nenalezen'}</h1>
+        <p>
+          {lang === 'en'
+            ? "This QR code doesn't match any active pub or table. Please ask the staff."
+            : 'Tenhle QR kód neodpovídá žádné aktivní hospodě nebo stolu. Zkus obsluhu.'}
+        </p>
       </div>
     )
   }
@@ -279,67 +306,49 @@ export function TablePage() {
   if (status === 'error' || !context) {
     return (
       <div style={{ padding: 24 }}>
-        <h1>Něco se pokazilo</h1>
-        <p>Zkus stránku znovu načíst, případně přivolej obsluhu.</p>
+        <LanguageSwitcher />
+        <h1>{lang === 'en' ? 'Something went wrong' : 'Něco se pokazilo'}</h1>
+        <p>
+          {lang === 'en'
+            ? 'Please try reloading the page, or call over the staff.'
+            : 'Zkus stránku znovu načíst, případně přivolej obsluhu.'}
+        </p>
       </div>
     )
   }
 
   return (
     <div className="table-page">
+      <LanguageSwitcher />
       <OfflineBanner isOnline={isOnline} pendingCount={pendingCount} />
       <header className="table-header">
         <h1>{context.venue.name}</h1>
-        <p>Stůl {context.table.label}</p>
+        <p>{lang === 'en' ? `Table ${context.table.label}` : `Stůl ${context.table.label}`}</p>
         {ratingSummary && ratingSummary.count > 0 && (
           <p className="table-rating-summary">
-            ★ {ratingSummary.avg_stars.toFixed(1)} ({ratingSummary.count} hodnocení)
+            ★ {ratingSummary.avg_stars.toFixed(1)} (
+            {lang === 'en' ? `${ratingSummary.count} ratings` : `${ratingSummary.count} hodnocení`})
           </p>
         )}
       </header>
 
       <Link to={`/v/${venueSlug}/t/${tableToken}/hodnoceni`} className="rate-venue-link">
-        ⭐ Ohodnotit podnik
+        {lang === 'en' ? '⭐ Rate this place' : '⭐ Ohodnotit podnik'}
       </Link>
 
       {context.venue.games_enabled && activeTournaments.length > 0 && (
         <Link to={`/v/${venueSlug}/t/${tableToken}/turnaje`} className="rate-venue-link tournaments-link">
-          🏆 Turnaje ({activeTournaments.length})
+          {lang === 'en' ? `🏆 Tournaments (${activeTournaments.length})` : `🏆 Turnaje (${activeTournaments.length})`}
         </Link>
       )}
 
       {context.venue.games_enabled && (
         <div className="games-links">
-          <Link to={`/v/${venueSlug}/t/${tableToken}/hra`} className="games-link">
-            🥕 Chytání surovin
-          </Link>
-          <Link to={`/v/${venueSlug}/t/${tableToken}/hra-let`} className="games-link">
-            🍺 Let mezi sudy
-          </Link>
-          <Link to={`/v/${venueSlug}/t/${tableToken}/hra-beh`} className="games-link">
-            🏃 Hospodský běh
-          </Link>
-          <Link to={`/v/${venueSlug}/t/${tableToken}/hra-skok`} className="games-link">
-            🕺 Skákání nahoru
-          </Link>
-          <Link to={`/v/${venueSlug}/t/${tableToken}/hra-lahve`} className="games-link">
-            🍾 Rozbíjení lahví
-          </Link>
-          <Link to={`/v/${venueSlug}/t/${tableToken}/hra-prsi`} className="games-link">
-            🃏 Prší
-          </Link>
-          <Link to={`/v/${venueSlug}/t/${tableToken}/hra-poker`} className="games-link">
-            ♠️ Poker
-          </Link>
-          <Link to={`/v/${venueSlug}/t/${tableToken}/hra-dama`} className="games-link">
-            ⚫ Dáma
-          </Link>
-          <Link to={`/v/${venueSlug}/t/${tableToken}/hra-sachy`} className="games-link">
-            ♞ Šachy
-          </Link>
-          <Link to={`/v/${venueSlug}/t/${tableToken}/hra-flaska`} className="games-link">
-            🍾 Flaška
-          </Link>
+          {GAME_LINKS.map((game) => (
+            <Link key={game.to} to={`/v/${venueSlug}/t/${tableToken}/${game.to}`} className="games-link">
+              {lang === 'en' ? game.en : game.cs}
+            </Link>
+          ))}
         </div>
       )}
 
@@ -361,10 +370,20 @@ export function TablePage() {
           {cartCount > 0 && (
             <div className="cart-bar">
               <div>
-                <strong>{cartCount}×</strong> v košíku · {cartTotal} Kč
+                <strong>{cartCount}×</strong> {lang === 'en' ? `in cart · ${cartTotal} Kč` : `v košíku · ${cartTotal} Kč`}
               </div>
               <button type="button" onClick={handleSubmitOrder} disabled={submitting}>
-                {submitting ? 'Odesílám…' : isOnline ? 'Odeslat objednávku' : 'Odeslat (offline – doručí se později)'}
+                {submitting
+                  ? lang === 'en'
+                    ? 'Sending…'
+                    : 'Odesílám…'
+                  : isOnline
+                    ? lang === 'en'
+                      ? 'Send order'
+                      : 'Odeslat objednávku'
+                    : lang === 'en'
+                      ? 'Send (offline – will be delivered later)'
+                      : 'Odeslat (offline – doručí se později)'}
               </button>
             </div>
           )}

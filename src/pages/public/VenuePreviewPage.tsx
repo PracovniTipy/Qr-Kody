@@ -3,6 +3,8 @@ import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabaseClient'
 import { VenuePreview } from '../../types/venueDirectory'
 import { MenuList } from '../../components/MenuList'
+import { LanguageSwitcher } from '../../components/LanguageSwitcher'
+import { useLanguage } from '../../lib/language'
 
 /**
  * Mapa podniků (masterplán, "co zbývá"): neveřejný náhled menu hospody bez
@@ -12,6 +14,7 @@ import { MenuList } from '../../components/MenuList'
  */
 export function VenuePreviewPage() {
   const { venueSlug } = useParams<{ venueSlug: string }>()
+  const { lang } = useLanguage()
   const [preview, setPreview] = useState<VenuePreview | null>(null)
   const [status, setStatus] = useState<'loading' | 'ok' | 'not_found' | 'error'>('loading')
 
@@ -40,14 +43,26 @@ export function VenuePreviewPage() {
     }
   }, [venueSlug])
 
-  if (status === 'loading') return <p style={{ padding: 24 }}>Načítám…</p>
+  if (status === 'loading') {
+    return (
+      <div style={{ padding: 24 }}>
+        <LanguageSwitcher />
+        <p>{lang === 'en' ? 'Loading…' : 'Načítám…'}</p>
+      </div>
+    )
+  }
 
   if (status === 'not_found') {
     return (
       <div style={{ padding: 24 }}>
-        <h1>Hospoda nenalezena</h1>
-        <p>Buď neexistuje, nebo není v adresáři zveřejněná.</p>
-        <Link to="/podniky">← Zpět na mapu podniků</Link>
+        <LanguageSwitcher />
+        <h1>{lang === 'en' ? 'Pub not found' : 'Hospoda nenalezena'}</h1>
+        <p>
+          {lang === 'en'
+            ? "Either it doesn't exist, or it's not listed in the directory."
+            : 'Buď neexistuje, nebo není v adresáři zveřejněná.'}
+        </p>
+        <Link to="/podniky">{lang === 'en' ? '← Back to venue map' : '← Zpět na mapu podniků'}</Link>
       </div>
     )
   }
@@ -55,17 +70,19 @@ export function VenuePreviewPage() {
   if (status === 'error' || !preview) {
     return (
       <div style={{ padding: 24 }}>
-        <h1>Něco se pokazilo</h1>
-        <p>Zkus stránku znovu načíst.</p>
+        <LanguageSwitcher />
+        <h1>{lang === 'en' ? 'Something went wrong' : 'Něco se pokazilo'}</h1>
+        <p>{lang === 'en' ? 'Please try reloading the page.' : 'Zkus stránku znovu načíst.'}</p>
       </div>
     )
   }
 
   return (
     <div className="table-page venue-preview-page">
+      <LanguageSwitcher />
       <header className="table-header">
         <Link to="/podniky" className="back-link">
-          ← Zpět na mapu podniků
+          {lang === 'en' ? '← Back to venue map' : '← Zpět na mapu podniků'}
         </Link>
         <h1>{preview.venue.name}</h1>
         {(preview.venue.address || preview.venue.city) && (
@@ -77,7 +94,9 @@ export function VenuePreviewPage() {
           <p className="venue-directory-hours">{preview.venue.opening_hours}</p>
         )}
         <p className="venue-preview-hint">
-          Náhled menu. Objednávat a hrát jde jen naskenováním QR kódu na stole v podniku.
+          {lang === 'en'
+            ? 'Menu preview. Ordering and games are only available by scanning the QR code on a table in the venue.'
+            : 'Náhled menu. Objednávat a hrát jde jen naskenováním QR kódu na stole v podniku.'}
         </p>
       </header>
 

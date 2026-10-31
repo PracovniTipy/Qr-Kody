@@ -11,6 +11,8 @@ import {
   ChessSavedPlayer,
   ChessSessionRow,
 } from '../../types/sachy'
+import { LanguageSwitcher } from '../../components/LanguageSwitcher'
+import { Lang, useLanguage } from '../../lib/language'
 
 const STORAGE_PREFIX = 'sachy_player_'
 
@@ -32,11 +34,11 @@ const PIECE_GLYPH: Record<string, string> = {
   k: '♚',
 }
 
-const PROMOTION_CHOICES: Array<{ value: Promotion; label: string }> = [
-  { value: 'Q', label: 'Dáma' },
-  { value: 'R', label: 'Věž' },
-  { value: 'B', label: 'Střelec' },
-  { value: 'N', label: 'Jezdec' },
+const PROMOTION_CHOICES: Array<{ value: Promotion; label: { cs: string; en: string } }> = [
+  { value: 'Q', label: { cs: 'Dáma', en: 'Queen' } },
+  { value: 'R', label: { cs: 'Věž', en: 'Rook' } },
+  { value: 'B', label: { cs: 'Střelec', en: 'Bishop' } },
+  { value: 'N', label: { cs: 'Jezdec', en: 'Knight' } },
 ]
 
 function loadSavedPlayer(tableToken: string): ChessSavedPlayer | null {
@@ -74,19 +76,17 @@ function clearSavedPlayer(tableToken: string) {
   }
 }
 
-function mapReason(reason?: string): string {
-  switch (reason) {
-    case 'not_your_turn':
-      return 'Teď je na tahu soupeř.'
-    case 'invalid_move':
-      return 'Tenhle tah není možný.'
-    case 'not_playing':
-      return 'Hra právě neběží.'
-    case 'invalid_token':
-      return 'Neplatná relace, zkus obnovit stránku.'
-    default:
-      return 'Tah se nepodařil, zkus to znovu.'
-  }
+const REASON_LABELS: Record<string, { cs: string; en: string }> = {
+  not_your_turn: { cs: 'Teď je na tahu soupeř.', en: "It's your opponent's turn now." },
+  invalid_move: { cs: 'Tenhle tah není možný.', en: "This move isn't possible." },
+  not_playing: { cs: 'Hra právě neběží.', en: 'The game is not running right now.' },
+  invalid_token: { cs: 'Neplatná relace, zkus obnovit stránku.', en: 'Invalid session, try reloading the page.' },
+}
+
+function mapReason(reason: string | undefined, lang: Lang): string {
+  const entry = reason ? REASON_LABELS[reason] : undefined
+  if (entry) return lang === 'en' ? entry.en : entry.cs
+  return lang === 'en' ? 'Move failed, try again.' : 'Tah se nepodařil, zkus to znovu.'
 }
 
 function pieceColor(p: ChessPiece): 'w' | 'b' | null {
@@ -336,6 +336,7 @@ function legalTargetsForSquare(
  */
 export function SachyGamePage() {
   const { venueSlug, tableToken } = useParams<{ venueSlug: string; tableToken: string }>()
+  const { lang } = useLanguage()
 
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [myToken, setMyToken] = useState<string | null>(null)
@@ -439,13 +440,13 @@ export function SachyGamePage() {
       const { data: createData } = await supabase.rpc('sachy_create_game', { p_qr_token: tableToken })
       const createResult = createData as ChessCreateGameResult | null
       if (!createResult) {
-        setError('Hru se nepodařilo založit. Zkus to znovu.')
+        setError(lang === 'en' ? "Couldn't create the game. Try again." : 'Hru se nepodařilo založit. Zkus to znovu.')
         setStarting(false)
         return
       }
       applyNewPlayer(createResult.session_id, createResult.player_token, createResult.player_no)
     } catch {
-      setError('Hru se nepodařilo spustit. Zkus to znovu.')
+      setError(lang === 'en' ? "Couldn't start the game. Try again." : 'Hru se nepodařilo spustit. Zkus to znovu.')
     }
     setStarting(false)
   }
@@ -479,7 +480,7 @@ export function SachyGamePage() {
       p_promotion: promotion,
     })
     const result = data as ChessMoveResult | null
-    if (!result?.ok) setError(mapReason(result?.reason))
+    if (!result?.ok) setError(mapReason(result?.reason, lang))
     setSelected(null)
     setPendingPromotion(null)
     await loadSession()
@@ -535,10 +536,11 @@ export function SachyGamePage() {
   return (
     <div className="game-page sachy-page">
       <header>
+        <LanguageSwitcher />
         <Link to={`/v/${venueSlug ?? ''}/t/${tableToken ?? ''}`} className="back-link">
-          ← Zpět ke stolu
+          {lang === 'en' ? '← Back to table' : '← Zpět ke stolu'}
         </Link>
-        <h1>♞ Šachy</h1>
+        <h1>{lang === 'en' ? '♞ Chess' : '♞ Šachy'}</h1>
       </header>
 
       {error && <p className="error">{error}</p>}
@@ -546,35 +548,63 @@ export function SachyGamePage() {
       {displayPhase === 'idle' && (
         <div className="game-idle">
           <p>
-            Šachy jsou desková hra pro dva hráče u stejného stolu - každý na svém telefonu. Klasická pravidla včetně
-            rošády, braní mimochodem a proměny pěšce. Ťukni na Hrát a druhý host ať udělá to samé.
+            {lang === 'en'
+              ? 'Chess is a board game for two players at the same table - each on their own phone. Classic rules including castling, en passant and pawn promotion. Tap Play and have the other guest do the same.'
+              : 'Šachy jsou desková hra pro dva hráče u stejného stolu - každý na svém telefonu. Klasická pravidla včetně rošády, braní mimochodem a proměny pěšce. Ťukni na Hrát a druhý host ať udělá to samé.'}
           </p>
           <button type="button" onClick={startOrJoin} disabled={starting}>
-            {starting ? 'Hledám hru…' : 'Hrát Šachy'}
+            {starting
+              ? lang === 'en'
+                ? 'Looking for a game…'
+                : 'Hledám hru…'
+              : lang === 'en'
+                ? 'Play Chess'
+                : 'Hrát Šachy'}
           </button>
         </div>
       )}
 
       {displayPhase === 'waiting' && (
         <div className="game-idle">
-          <p>Čekám na druhého hráče… Ať se druhý host u stejného stolu taky ťukne na "Šachy" a připojí se.</p>
+          <p>
+            {lang === 'en'
+              ? 'Waiting for the second player… Have the other guest at the same table tap "Chess" and join too.'
+              : 'Čekám na druhého hráče… Ať se druhý host u stejného stolu taky ťukne na "Šachy" a připojí se.'}
+          </p>
           <button type="button" onClick={resetToIdle}>
-            Zrušit hledání
+            {lang === 'en' ? 'Cancel search' : 'Zrušit hledání'}
           </button>
         </div>
       )}
 
       {displayPhase === 'playing' && session && (
         <div className="sachy-board-wrap">
-          <p className="sachy-color-indicator">Hraješ za: {myColor === 'w' ? '⚪ bílé' : '⚫ černé'}</p>
+          <p className="sachy-color-indicator">
+            {lang === 'en' ? 'Playing as: ' : 'Hraješ za: '}
+            {myColor === 'w'
+              ? lang === 'en'
+                ? '⚪ white'
+                : '⚪ bílé'
+              : lang === 'en'
+                ? '⚫ black'
+                : '⚫ černé'}
+          </p>
           <p className="sachy-turn-indicator">
             {isMyTurn
               ? opponentInCheck
-                ? 'Jsi na tahu - máš šach!'
-                : 'Jsi na tahu!'
+                ? lang === 'en'
+                  ? "It's your turn - you're in check!"
+                  : 'Jsi na tahu - máš šach!'
+                : lang === 'en'
+                  ? "It's your turn!"
+                  : 'Jsi na tahu!'
               : opponentInCheck
-              ? 'Soupeř má šach…'
-              : 'Čekej, hraje soupeř…'}
+                ? lang === 'en'
+                  ? 'Opponent is in check…'
+                  : 'Soupeř má šach…'
+                : lang === 'en'
+                  ? 'Wait, opponent is playing…'
+                  : 'Čekej, hraje soupeř…'}
           </p>
           <div className="sachy-board">
             {orderedSquares.map((idx) => {
@@ -610,7 +640,7 @@ export function SachyGamePage() {
           {pendingPromotion && (
             <div className="sachy-promotion-overlay">
               <div className="sachy-promotion-picker">
-                <p>Na co proměnit pěšce?</p>
+                <p>{lang === 'en' ? 'Promote pawn to?' : 'Na co proměnit pěšce?'}</p>
                 <div className="sachy-promotion-options">
                   {PROMOTION_CHOICES.map((choice) => (
                     <button
@@ -619,7 +649,7 @@ export function SachyGamePage() {
                       onClick={() => void submitMove(pendingPromotion.from, pendingPromotion.to, choice.value)}
                     >
                       <span className="sachy-face-icon">{PIECE_GLYPH[myColor === 'w' ? choice.value : choice.value.toLowerCase()]}</span>
-                      <span className="sachy-promotion-label">{choice.label}</span>
+                      <span className="sachy-promotion-label">{lang === 'en' ? choice.label.en : choice.label.cs}</span>
                     </button>
                   ))}
                 </div>
@@ -628,7 +658,7 @@ export function SachyGamePage() {
                   className="sachy-promotion-cancel"
                   onClick={() => setPendingPromotion(null)}
                 >
-                  Zrušit
+                  {lang === 'en' ? 'Cancel' : 'Zrušit'}
                 </button>
               </div>
             </div>
@@ -640,13 +670,19 @@ export function SachyGamePage() {
         <div className="game-result">
           <p>
             {session.game_over_reason === 'stalemate'
-              ? 'Pat - remíza.'
+              ? lang === 'en'
+                ? 'Stalemate - draw.'
+                : 'Pat - remíza.'
               : session.winner === myPlayerNo
-              ? 'Vyhrál jsi matem! 🎉'
-              : 'Prohrál jsi matem.'}
+                ? lang === 'en'
+                  ? 'You won by checkmate! 🎉'
+                  : 'Vyhrál jsi matem! 🎉'
+                : lang === 'en'
+                  ? 'You lost by checkmate.'
+                  : 'Prohrál jsi matem.'}
           </p>
           <button type="button" onClick={resetToIdle}>
-            Hrát znovu
+            {lang === 'en' ? 'Play again' : 'Hrát znovu'}
           </button>
         </div>
       )}

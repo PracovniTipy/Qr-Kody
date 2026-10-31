@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabaseClient'
 import { PublicVenue } from '../../types/venueDirectory'
+import { LanguageSwitcher } from '../../components/LanguageSwitcher'
+import { useLanguage } from '../../lib/language'
 
 /**
  * Mapa podniků (masterplán, "co zbývá": mapa podniků) - veřejný adresář
@@ -12,6 +14,7 @@ import { PublicVenue } from '../../types/venueDirectory'
  * (VenuePreviewPage) - bez objednávání, jen orientační.
  */
 export function VenueMapPage() {
+  const { lang } = useLanguage()
   const [venues, setVenues] = useState<PublicVenue[]>([])
   const [status, setStatus] = useState<'loading' | 'ok' | 'error'>('loading')
 
@@ -37,14 +40,25 @@ export function VenueMapPage() {
 
   return (
     <div className="venue-map-page">
+      <LanguageSwitcher />
       <header>
-        <h1>🗺️ Mapa podniků</h1>
-        <p className="menu-item-desc">Hospody, které používají StůlHraje a chtějí být vidět.</p>
+        <h1>{lang === 'en' ? '🗺️ Venue map' : '🗺️ Mapa podniků'}</h1>
+        <p className="menu-item-desc">
+          {lang === 'en'
+            ? 'Pubs using StůlHraje that want to be found.'
+            : 'Hospody, které používají StůlHraje a chtějí být vidět.'}
+        </p>
       </header>
 
-      {status === 'loading' && <p>Načítám…</p>}
-      {status === 'error' && <p className="error">Adresář se nepodařilo načíst. Zkus to znovu.</p>}
-      {status === 'ok' && venues.length === 0 && <p>Zatím tu žádná hospoda není zveřejněná.</p>}
+      {status === 'loading' && <p>{lang === 'en' ? 'Loading…' : 'Načítám…'}</p>}
+      {status === 'error' && (
+        <p className="error">
+          {lang === 'en' ? "Couldn't load the directory. Try again." : 'Adresář se nepodařilo načíst. Zkus to znovu.'}
+        </p>
+      )}
+      {status === 'ok' && venues.length === 0 && (
+        <p>{lang === 'en' ? 'No pub is listed here yet.' : 'Zatím tu žádná hospoda není zveřejněná.'}</p>
+      )}
 
       <ul className="venue-directory-list">
         {venues.map((v) => (
