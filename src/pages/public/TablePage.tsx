@@ -14,6 +14,7 @@ import { useLanguage } from '../../lib/language'
 import { useOnlineStatus } from '../../hooks/useOnlineStatus'
 import { cacheTableContext, readCachedTableContext } from '../../lib/offlineTableContext'
 import { enqueueOrder, flushOrderQueue, getQueueForTable } from '../../lib/offlineOrderQueue'
+import { rememberLastTable } from '../../lib/lastTable'
 
 /**
  * Veřejná stránka stolu: app.cz/v/:venueSlug/t/:tableToken
@@ -115,6 +116,17 @@ export function TablePage() {
       active = false
     }
   }, [venueSlug, tableToken])
+
+  // Aplikace / instalovaná PWA: zapamatujeme si stůl, ať domovská obrazovka
+  // po znovuotevření appky nabídne "Pokračovat u stolu" bez nového skenování.
+  useEffect(() => {
+    if (status !== 'ok' || !context || !venueSlug || !tableToken) return
+    rememberLastTable({
+      path: `/v/${venueSlug}/t/${tableToken}`,
+      venueName: context.venue.name,
+      tableLabel: context.table.label,
+    })
+  }, [status, context, venueSlug, tableToken])
 
   // Fronta čekajících objednávek pro tenhle stůl – pro zobrazení v banneru.
   useEffect(() => {
