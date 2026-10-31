@@ -13,18 +13,25 @@ import {
   Rank,
   Suit,
 } from '../../types/prsi'
+import { LanguageSwitcher } from '../../components/LanguageSwitcher'
+import { Lang, useLanguage } from '../../lib/language'
 
 const SUIT_SYMBOL: Record<Suit, string> = { zaludy: '🌰', kule: '🔔', srdce: '♥', listy: '🍃' }
-const SUIT_LABEL: Record<Suit, string> = { zaludy: 'žaludy', kule: 'kule', srdce: 'srdce', listy: 'listy' }
-const RANK_LABEL: Record<Rank, string> = {
-  '7': '7',
-  '8': '8',
-  '9': '9',
-  '10': '10',
-  spodek: 'Sp',
-  svrsek: 'Sv',
-  kral: 'Kr',
-  eso: 'Es',
+const SUIT_LABEL: Record<Suit, { cs: string; en: string }> = {
+  zaludy: { cs: 'žaludy', en: 'acorns' },
+  kule: { cs: 'kule', en: 'bells' },
+  srdce: { cs: 'srdce', en: 'hearts' },
+  listy: { cs: 'listy', en: 'leaves' },
+}
+const RANK_LABEL: Record<Rank, { cs: string; en: string }> = {
+  '7': { cs: '7', en: '7' },
+  '8': { cs: '8', en: '8' },
+  '9': { cs: '9', en: '9' },
+  '10': { cs: '10', en: '10' },
+  spodek: { cs: 'Sp', en: 'Lo' },
+  svrsek: { cs: 'Sv', en: 'Up' },
+  kral: { cs: 'Kr', en: 'K' },
+  eso: { cs: 'Es', en: 'A' },
 }
 const ALL_SUITS: Suit[] = ['zaludy', 'kule', 'srdce', 'listy']
 const STORAGE_PREFIX = 'prsi_player_'
@@ -67,23 +74,19 @@ function clearSavedPlayer(tableToken: string) {
   }
 }
 
-function mapReason(reason?: string): string {
-  switch (reason) {
-    case 'not_your_turn':
-      return 'Teď je na tahu soupeř.'
-    case 'card_not_in_hand':
-      return 'Tuhle kartu nemáš v ruce.'
-    case 'card_not_playable':
-      return 'Tuhle kartu teď nemůžeš zahrát.'
-    case 'missing_declared_suit':
-      return 'Musíš vybrat barvu.'
-    case 'not_playing':
-      return 'Hra právě neběží.'
-    case 'invalid_token':
-      return 'Neplatná relace, zkus obnovit stránku.'
-    default:
-      return 'Tah se nepodařil, zkus to znovu.'
-  }
+const REASON_LABELS: Record<string, { cs: string; en: string }> = {
+  not_your_turn: { cs: 'Teď je na tahu soupeř.', en: "It's your opponent's turn now." },
+  card_not_in_hand: { cs: 'Tuhle kartu nemáš v ruce.', en: "You don't have that card in your hand." },
+  card_not_playable: { cs: 'Tuhle kartu teď nemůžeš zahrát.', en: "You can't play that card right now." },
+  missing_declared_suit: { cs: 'Musíš vybrat barvu.', en: 'You need to pick a suit.' },
+  not_playing: { cs: 'Hra právě neběží.', en: 'The game is not running right now.' },
+  invalid_token: { cs: 'Neplatná relace, zkus obnovit stránku.', en: 'Invalid session, try reloading the page.' },
+}
+
+function mapReason(reason: string | undefined, lang: Lang): string {
+  const entry = reason ? REASON_LABELS[reason] : undefined
+  if (entry) return lang === 'en' ? entry.en : entry.cs
+  return lang === 'en' ? 'Move failed, try again.' : 'Tah se nepodařil, zkus to znovu.'
 }
 
 // Postava (Material "person" ikona) pro figurkove karty - Spodek/Svrsek/Kral.
@@ -115,10 +118,11 @@ function FaceFigure({ rank }: { rank: 'spodek' | 'svrsek' | 'kral' }) {
 }
 
 function CardFace({ card }: { card: Card }) {
+  const { lang } = useLanguage()
   const isFace = card.rank === 'spodek' || card.rank === 'svrsek' || card.rank === 'kral'
   return (
     <span className={`prsi-card suit-${card.suit}${isFace ? ' prsi-card-face' : ''}`}>
-      <span className="prsi-card-rank">{RANK_LABEL[card.rank]}</span>
+      <span className="prsi-card-rank">{RANK_LABEL[card.rank][lang]}</span>
       {card.rank === 'svrsek' && <span className="prsi-face-pip prsi-face-pip-top">{SUIT_SYMBOL[card.suit]}</span>}
       {isFace ? (
         <FaceFigure rank={card.rank as 'spodek' | 'svrsek' | 'kral'} />
@@ -148,6 +152,7 @@ function CardFace({ card }: { card: Card }) {
  */
 export function PrsiGamePage() {
   const { venueSlug, tableToken } = useParams<{ venueSlug: string; tableToken: string }>()
+  const { lang } = useLanguage()
 
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [myToken, setMyToken] = useState<string | null>(null)
@@ -270,13 +275,13 @@ export function PrsiGamePage() {
       const { data: createData } = await supabase.rpc('prsi_create_game', { p_qr_token: tableToken })
       const createResult = createData as PrsiCreateGameResult | null
       if (!createResult) {
-        setError('Hru se nepodařilo založit. Zkus to znovu.')
+        setError(lang === 'en' ? "Couldn't create the game. Try again." : 'Hru se nepodařilo založit. Zkus to znovu.')
         setStarting(false)
         return
       }
       applyNewPlayer(createResult.session_id, createResult.player_token, createResult.player_no)
     } catch {
-      setError('Hru se nepodařilo spustit. Zkus to znovu.')
+      setError(lang === 'en' ? "Couldn't start the game. Try again." : 'Hru se nepodařilo spustit. Zkus to znovu.')
     }
     setStarting(false)
   }
@@ -292,7 +297,7 @@ export function PrsiGamePage() {
       p_declared_suit: declaredSuit,
     })
     const result = data as PrsiActionResult | null
-    if (!result?.ok) setError(mapReason(result?.reason))
+    if (!result?.ok) setError(mapReason(result?.reason, lang))
     await loadSession()
     await loadHand()
     setActing(false)
@@ -325,7 +330,7 @@ export function PrsiGamePage() {
       p_player_token: myToken,
     })
     const result = data as PrsiActionResult | null
-    if (!result?.ok) setError(mapReason(result?.reason))
+    if (!result?.ok) setError(mapReason(result?.reason, lang))
     await loadSession()
     await loadHand()
     setActing(false)
@@ -361,10 +366,11 @@ export function PrsiGamePage() {
   return (
     <div className="game-page prsi-page">
       <header>
+        <LanguageSwitcher />
         <Link to={`/v/${venueSlug ?? ''}/t/${tableToken ?? ''}`} className="back-link">
-          ← Zpět ke stolu
+          {lang === 'en' ? '← Back to table' : '← Zpět ke stolu'}
         </Link>
-        <h1>🃏 Prší</h1>
+        <h1>{lang === 'en' ? '🃏 Crazy Eights' : '🃏 Prší'}</h1>
       </header>
 
       {error && <p className="error">{error}</p>}
@@ -372,20 +378,25 @@ export function PrsiGamePage() {
       {displayPhase === 'idle' && (
         <div className="game-idle">
           <p>
-            Prší je karetní hra pro dva hráče u stejného stolu - každý na svém telefonu. Ťukni na Hrát a druhý host
-            ať udělá to samé.
+            {lang === 'en'
+              ? 'Crazy Eights is a card game for two players at the same table - each on their own phone. Tap Play and have the other guest do the same.'
+              : 'Prší je karetní hra pro dva hráče u stejného stolu - každý na svém telefonu. Ťukni na Hrát a druhý host ať udělá to samé.'}
           </p>
           <button type="button" onClick={startOrJoin} disabled={starting}>
-            {starting ? 'Hledám hru…' : 'Hrát Prší'}
+            {starting ? (lang === 'en' ? 'Looking for a game…' : 'Hledám hru…') : lang === 'en' ? 'Play Crazy Eights' : 'Hrát Prší'}
           </button>
         </div>
       )}
 
       {displayPhase === 'waiting' && (
         <div className="game-idle">
-          <p>Čekám na druhého hráče… Ať se druhý host u stejného stolu taky ťukne na "Prší" a připojí se.</p>
+          <p>
+            {lang === 'en'
+              ? 'Waiting for the second player… Have the other guest at the same table tap "Crazy Eights" and join too.'
+              : 'Čekám na druhého hráče… Ať se druhý host u stejného stolu taky ťukne na "Prší" a připojí se.'}
+          </p>
           <button type="button" onClick={resetToIdle}>
-            Zrušit hledání
+            {lang === 'en' ? 'Cancel search' : 'Zrušit hledání'}
           </button>
         </div>
       )}
@@ -393,7 +404,7 @@ export function PrsiGamePage() {
       {displayPhase === 'playing' && session && (
         <div className="prsi-board">
           <div className="prsi-opponent">
-            <span>Soupeř</span>
+            <span>{lang === 'en' ? 'Opponent' : 'Soupeř'}</span>
             <span className="prsi-card-back-stack">
               {opponentHandCount}× <span className="prsi-card back" />
             </span>
@@ -402,21 +413,36 @@ export function PrsiGamePage() {
           <div className="prsi-table">
             <div className="prsi-pile">
               <span className="prsi-card back" />
-              <span className="prsi-pile-label">Talon: {session.draw_pile_count}</span>
+              <span className="prsi-pile-label">
+                {lang === 'en' ? 'Draw pile' : 'Talon'}: {session.draw_pile_count}
+              </span>
             </div>
             <div className="prsi-pile">
               {session.discard_top ? <CardFace card={session.discard_top} /> : <span className="prsi-card back" />}
               {session.current_suit && (
                 <span className="prsi-declared-suit">
-                  Platí: {SUIT_SYMBOL[session.current_suit]} {SUIT_LABEL[session.current_suit]}
+                  {lang === 'en' ? 'In play' : 'Platí'}: {SUIT_SYMBOL[session.current_suit]}{' '}
+                  {SUIT_LABEL[session.current_suit][lang]}
                 </span>
               )}
             </div>
           </div>
 
-          {session.pending_draw > 0 && <p className="prsi-pending-draw">Dluží se lízání: +{session.pending_draw}</p>}
+          {session.pending_draw > 0 && (
+            <p className="prsi-pending-draw">
+              {lang === 'en' ? 'Must draw' : 'Dluží se lízání'}: +{session.pending_draw}
+            </p>
+          )}
 
-          <p className="prsi-turn-indicator">{isMyTurn ? 'Jsi na tahu!' : 'Čekej, hraje soupeř…'}</p>
+          <p className="prsi-turn-indicator">
+            {isMyTurn
+              ? lang === 'en'
+                ? "It's your turn!"
+                : 'Jsi na tahu!'
+              : lang === 'en'
+                ? 'Wait, opponent is playing…'
+                : 'Čekej, hraje soupeř…'}
+          </p>
 
           <div className="prsi-hand">
             {hand.map((card, i) => (
@@ -433,16 +459,24 @@ export function PrsiGamePage() {
           </div>
 
           <button type="button" className="prsi-draw-button" onClick={drawCard} disabled={!isMyTurn || acting}>
-            {acting ? 'Čekej…' : 'Líznout'}
+            {acting ? (lang === 'en' ? 'Wait…' : 'Čekej…') : lang === 'en' ? 'Draw' : 'Líznout'}
           </button>
         </div>
       )}
 
       {displayPhase === 'finished' && session && (
         <div className="game-result">
-          <p>{session.winner === myPlayerNo ? 'Vyhrál jsi! 🎉' : 'Prohrál jsi.'}</p>
+          <p>
+            {session.winner === myPlayerNo
+              ? lang === 'en'
+                ? 'You won! 🎉'
+                : 'Vyhrál jsi! 🎉'
+              : lang === 'en'
+                ? 'You lost.'
+                : 'Prohrál jsi.'}
+          </p>
           <button type="button" onClick={resetToIdle}>
-            Hrát znovu
+            {lang === 'en' ? 'Play again' : 'Hrát znovu'}
           </button>
         </div>
       )}
@@ -450,11 +484,11 @@ export function PrsiGamePage() {
       {suitChoiceOpen && (
         <div className="prsi-suit-picker-overlay">
           <div className="prsi-suit-picker">
-            <p>Vyber barvu, kterou svršek mění:</p>
+            <p>{lang === 'en' ? 'Choose the suit your Jack changes to:' : 'Vyber barvu, kterou svršek mění:'}</p>
             <div className="prsi-suit-picker-options">
               {ALL_SUITS.map((s) => (
                 <button type="button" className={`suit-${s}`} key={s} onClick={() => chooseSuit(s)}>
-                  {SUIT_SYMBOL[s]} <span className="prsi-suit-picker-label">{SUIT_LABEL[s]}</span>
+                  {SUIT_SYMBOL[s]} <span className="prsi-suit-picker-label">{SUIT_LABEL[s][lang]}</span>
                 </button>
               ))}
             </div>
@@ -466,7 +500,7 @@ export function PrsiGamePage() {
                 setPendingWildCard(null)
               }}
             >
-              Zrušit
+              {lang === 'en' ? 'Cancel' : 'Zrušit'}
             </button>
           </div>
         </div>

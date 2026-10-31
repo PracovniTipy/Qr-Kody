@@ -13,27 +13,29 @@ import {
   PokerSessionRow,
   PokerStage,
 } from '../../types/poker'
+import { LanguageSwitcher } from '../../components/LanguageSwitcher'
+import { Lang, useLanguage } from '../../lib/language'
 
 const SUIT_SYMBOL: Record<string, string> = { S: '♠', H: '♥', D: '♦', C: '♣' }
 const RED_SUITS = new Set(['H', 'D'])
 const STORAGE_PREFIX = 'poker_player_'
-const STAGE_LABEL: Record<PokerStage, string> = {
-  preflop: 'Před flopem',
-  flop: 'Flop',
-  turn: 'Turn',
-  river: 'Řeka',
-  showdown: 'Vyhodnocení',
+const STAGE_LABEL: Record<PokerStage, { cs: string; en: string }> = {
+  preflop: { cs: 'Před flopem', en: 'Pre-flop' },
+  flop: { cs: 'Flop', en: 'Flop' },
+  turn: { cs: 'Turn', en: 'Turn' },
+  river: { cs: 'Řeka', en: 'River' },
+  showdown: { cs: 'Vyhodnocení', en: 'Showdown' },
 }
-const CATEGORY_LABEL = [
-  'Vysoká karta',
-  'Pár',
-  'Dvě dvojice',
-  'Trojice',
-  'Postupka',
-  'Barva',
-  'Full house',
-  'Čtveřice',
-  'Postupka v barvě',
+const CATEGORY_LABEL: Array<{ cs: string; en: string }> = [
+  { cs: 'Vysoká karta', en: 'High card' },
+  { cs: 'Pár', en: 'Pair' },
+  { cs: 'Dvě dvojice', en: 'Two pair' },
+  { cs: 'Trojice', en: 'Three of a kind' },
+  { cs: 'Postupka', en: 'Straight' },
+  { cs: 'Barva', en: 'Flush' },
+  { cs: 'Full house', en: 'Full house' },
+  { cs: 'Čtveřice', en: 'Four of a kind' },
+  { cs: 'Postupka v barvě', en: 'Straight flush' },
 ]
 
 function loadSavedPlayer(tableToken: string): PokerSavedPlayer | null {
@@ -66,37 +68,29 @@ function clearSavedPlayer(tableToken: string) {
   }
 }
 
-function mapReason(reason?: string): string {
-  switch (reason) {
-    case 'not_your_turn':
-      return 'Teď je na tahu někdo jiný.'
-    case 'not_active':
-      return 'Momentálně nemůžeš hrát (složil jsi karty, nebo jsi all-in).'
-    case 'must_call':
-      return 'Musíš dorovnat, nebo složit karty.'
-    case 'nothing_to_call':
-      return 'Není co dorovnávat - zkontroluj (check).'
-    case 'invalid_amount':
-      return 'Zadej platnou částku.'
-    case 'not_enough_chips':
-      return 'Nemáš tolik žetonů.'
-    case 'raise_too_small':
-      return 'Navýšení musí být větší.'
-    case 'not_playing':
-      return 'Hra právě neběží.'
-    case 'invalid_token':
-      return 'Neplatná relace, zkus obnovit stránku.'
-    case 'not_waiting':
-      return 'Hra už začala.'
-    case 'need_players':
-      return 'Potřeba aspoň 2 hráče u stolu.'
-    case 'full':
-      return 'Stůl je plný (max 8 hráčů).'
-    case 'not_ready':
-      return 'Ještě není konec kola.'
-    default:
-      return 'Akci se nepodařilo provést, zkus to znovu.'
-  }
+const REASON_LABELS: Record<string, { cs: string; en: string }> = {
+  not_your_turn: { cs: 'Teď je na tahu někdo jiný.', en: "It's someone else's turn now." },
+  not_active: {
+    cs: 'Momentálně nemůžeš hrát (složil jsi karty, nebo jsi all-in).',
+    en: "You can't play right now (you've folded or you're all-in).",
+  },
+  must_call: { cs: 'Musíš dorovnat, nebo složit karty.', en: 'You have to call, or fold.' },
+  nothing_to_call: { cs: 'Není co dorovnávat - zkontroluj (check).', en: "There's nothing to call - check instead." },
+  invalid_amount: { cs: 'Zadej platnou částku.', en: 'Enter a valid amount.' },
+  not_enough_chips: { cs: 'Nemáš tolik žetonů.', en: "You don't have that many chips." },
+  raise_too_small: { cs: 'Navýšení musí být větší.', en: 'The raise has to be bigger.' },
+  not_playing: { cs: 'Hra právě neběží.', en: 'The game is not running right now.' },
+  invalid_token: { cs: 'Neplatná relace, zkus obnovit stránku.', en: 'Invalid session, try reloading the page.' },
+  not_waiting: { cs: 'Hra už začala.', en: 'The game has already started.' },
+  need_players: { cs: 'Potřeba aspoň 2 hráče u stolu.', en: 'Need at least 2 players at the table.' },
+  full: { cs: 'Stůl je plný (max 8 hráčů).', en: 'The table is full (max 8 players).' },
+  not_ready: { cs: 'Ještě není konec kola.', en: "The round isn't over yet." },
+}
+
+function mapReason(reason: string | undefined, lang: Lang): string {
+  const entry = reason ? REASON_LABELS[reason] : undefined
+  if (entry) return lang === 'en' ? entry.en : entry.cs
+  return lang === 'en' ? "Couldn't complete the action, try again." : 'Akci se nepodařilo provést, zkus to znovu.'
 }
 
 function CardFace({ card }: { card: Card }) {
@@ -119,6 +113,7 @@ function CardFace({ card }: { card: Card }) {
  */
 export function PokerGamePage() {
   const { venueSlug, tableToken } = useParams<{ venueSlug: string; tableToken: string }>()
+  const { lang } = useLanguage()
 
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [myToken, setMyToken] = useState<string | null>(null)
@@ -235,13 +230,13 @@ export function PokerGamePage() {
       const { data: createData } = await supabase.rpc('poker_create_game', { p_qr_token: tableToken })
       const createResult = createData as PokerCreateGameResult | null
       if (!createResult) {
-        setError('Hru se nepodařilo založit. Zkus to znovu.')
+        setError(lang === 'en' ? "Couldn't create the game. Try again." : 'Hru se nepodařilo založit. Zkus to znovu.')
         setStarting(false)
         return
       }
       applyNewPlayer(createResult.session_id, createResult.player_token, createResult.seat_no)
     } catch {
-      setError('Hru se nepodařilo spustit. Zkus to znovu.')
+      setError(lang === 'en' ? "Couldn't start the game. Try again." : 'Hru se nepodařilo spustit. Zkus to znovu.')
     }
     setStarting(false)
   }
@@ -252,7 +247,7 @@ export function PokerGamePage() {
     setError(null)
     const { data } = await supabase.rpc('poker_start_game', { p_session_id: sessionId, p_player_token: myToken })
     const result = data as PokerActionResult | null
-    if (!result?.ok) setError(mapReason(result?.reason))
+    if (!result?.ok) setError(mapReason(result?.reason, lang))
     await refreshAll()
     setActing(false)
   }
@@ -263,7 +258,7 @@ export function PokerGamePage() {
     setError(null)
     const { data } = await supabase.rpc('poker_next_hand', { p_session_id: sessionId, p_player_token: myToken })
     const result = data as PokerActionResult | null
-    if (!result?.ok) setError(mapReason(result?.reason))
+    if (!result?.ok) setError(mapReason(result?.reason, lang))
     await refreshAll()
     setActing(false)
   }
@@ -279,7 +274,7 @@ export function PokerGamePage() {
       p_amount: amount ?? null,
     })
     const result = data as PokerActionResult | null
-    if (!result?.ok) setError(mapReason(result?.reason))
+    if (!result?.ok) setError(mapReason(result?.reason, lang))
     await refreshAll()
     setActing(false)
   }
@@ -321,8 +316,9 @@ export function PokerGamePage() {
   return (
     <div className="game-page poker-page">
       <header>
+        <LanguageSwitcher />
         <Link to={`/v/${venueSlug ?? ''}/t/${tableToken ?? ''}`} className="back-link">
-          ← Zpět ke stolu
+          {lang === 'en' ? '← Back to table' : '← Zpět ke stolu'}
         </Link>
         <h1>♠️ Poker</h1>
       </header>
@@ -332,11 +328,12 @@ export function PokerGamePage() {
       {displayPhase === 'idle' && (
         <div className="game-idle">
           <p>
-            Texas Hold'em poker pro 2 až 8 hráčů u stejného stolu - každý na svém telefonu. Ťukni na Hrát a hraje se
-            na žetony (bez skutečných peněz), na vyřazování - kdo přijde o všechny žetony, je ze hry.
+            {lang === 'en'
+              ? "Texas Hold'em poker for 2 to 8 players at the same table - each on their own phone. Tap Play and it's played with chips (no real money), elimination style - whoever loses all their chips is out."
+              : "Texas Hold'em poker pro 2 až 8 hráčů u stejného stolu - každý na svém telefonu. Ťukni na Hrát a hraje se na žetony (bez skutečných peněz), na vyřazování - kdo přijde o všechny žetony, je ze hry."}
           </p>
           <button type="button" onClick={startOrJoin} disabled={starting}>
-            {starting ? 'Připojuji…' : 'Hrát Poker'}
+            {starting ? (lang === 'en' ? 'Joining…' : 'Připojuji…') : lang === 'en' ? 'Play Poker' : 'Hrát Poker'}
           </button>
         </div>
       )}
@@ -344,21 +341,31 @@ export function PokerGamePage() {
       {displayPhase === 'waiting' && session && (
         <div className="game-idle">
           <p>
-            U stolu čeká {seatCount} {seatCount === 1 ? 'hráč' : seatCount < 5 ? 'hráči' : 'hráčů'} (max 8). Ať se
-            další hosté u stolu taky ťuknou na "Poker" a připojí se, nebo hru rovnou začni.
+            {lang === 'en' ? (
+              <>
+                {seatCount} {seatCount === 1 ? 'player' : 'players'} waiting at the table (max 8). Have the other
+                guests at the table tap "Poker" too and join, or just start the game.
+              </>
+            ) : (
+              <>
+                U stolu čeká {seatCount} {seatCount === 1 ? 'hráč' : seatCount < 5 ? 'hráči' : 'hráčů'} (max 8). Ať se
+                další hosté u stolu taky ťuknou na "Poker" a připojí se, nebo hru rovnou začni.
+              </>
+            )}
           </p>
           <ul className="poker-waiting-list">
             {players.map((p) => (
               <li key={p.seat_no}>
-                Hráč {p.seat_no} {p.seat_no === mySeatNo ? '(Ty)' : ''}
+                {lang === 'en' ? 'Player' : 'Hráč'} {p.seat_no}{' '}
+                {p.seat_no === mySeatNo ? (lang === 'en' ? '(You)' : '(Ty)') : ''}
               </li>
             ))}
           </ul>
           <button type="button" onClick={beginGame} disabled={acting || seatCount < 2}>
-            {acting ? 'Spouštím…' : 'Začít hru'}
+            {acting ? (lang === 'en' ? 'Starting…' : 'Spouštím…') : lang === 'en' ? 'Start game' : 'Začít hru'}
           </button>
           <button type="button" className="poker-secondary" onClick={resetToIdle}>
-            Odejít od stolu
+            {lang === 'en' ? 'Leave table' : 'Odejít od stolu'}
           </button>
         </div>
       )}
@@ -366,12 +373,15 @@ export function PokerGamePage() {
       {(displayPhase === 'playing' || displayPhase === 'showdown') && session && (
         <div className="poker-board">
           <p className="poker-stage-label">
-            Kolo {session.hand_number} · {STAGE_LABEL[session.stage]} · Pot: {session.pot}
+            {lang === 'en' ? 'Round' : 'Kolo'} {session.hand_number} · {STAGE_LABEL[session.stage][lang]} · Pot:{' '}
+            {session.pot}
           </p>
 
           <div className="poker-community">
             {session.community_cards.length === 0 ? (
-              <span className="poker-community-empty">— zatím žádné spol. karty —</span>
+              <span className="poker-community-empty">
+                {lang === 'en' ? '— no community cards yet —' : '— zatím žádné spol. karty —'}
+              </span>
             ) : (
               session.community_cards.map((c, i) => <CardFace card={c} key={`${c.rank}${c.suit}-${i}`} />)
             )}
@@ -386,17 +396,27 @@ export function PokerGamePage() {
                 }`}
               >
                 <span className="poker-seat-name">
-                  Hráč {p.seat_no}
-                  {p.seat_no === mySeatNo ? ' (Ty)' : ''}
+                  {lang === 'en' ? 'Player' : 'Hráč'} {p.seat_no}
+                  {p.seat_no === mySeatNo ? (lang === 'en' ? ' (You)' : ' (Ty)') : ''}
                   {p.seat_no === session.dealer_seat ? ' · D' : ''}
                 </span>
-                <span className="poker-seat-chips">{p.chips} žetonů</span>
-                {p.bet_this_round > 0 && <span className="poker-seat-bet">vklad: {p.bet_this_round}</span>}
-                {p.status === 'folded' && <span className="poker-seat-status">Složil</span>}
+                <span className="poker-seat-chips">
+                  {p.chips} {lang === 'en' ? 'chips' : 'žetonů'}
+                </span>
+                {p.bet_this_round > 0 && (
+                  <span className="poker-seat-bet">
+                    {lang === 'en' ? 'bet' : 'vklad'}: {p.bet_this_round}
+                  </span>
+                )}
+                {p.status === 'folded' && (
+                  <span className="poker-seat-status">{lang === 'en' ? 'Folded' : 'Složil'}</span>
+                )}
                 {p.status === 'all_in' && <span className="poker-seat-status">All-in</span>}
-                {p.status === 'out' && <span className="poker-seat-status">Mimo hru</span>}
+                {p.status === 'out' && (
+                  <span className="poker-seat-status">{lang === 'en' ? 'Out' : 'Mimo hru'}</span>
+                )}
                 {p.seat_no === session.to_act_seat && session.stage !== 'showdown' && (
-                  <span className="poker-seat-status on-turn-label">Na tahu</span>
+                  <span className="poker-seat-status on-turn-label">{lang === 'en' ? 'Up now' : 'Na tahu'}</span>
                 )}
               </li>
             ))}
@@ -404,7 +424,7 @@ export function PokerGamePage() {
 
           {myCards.length > 0 && (
             <div className="poker-my-hand">
-              <span className="poker-my-hand-label">Tvoje karty:</span>
+              <span className="poker-my-hand-label">{lang === 'en' ? 'Your cards:' : 'Tvoje karty:'}</span>
               {myCards.map((c, i) => (
                 <CardFace card={c} key={`${c.rank}${c.suit}-${i}`} />
               ))}
@@ -413,22 +433,28 @@ export function PokerGamePage() {
 
           {displayPhase === 'playing' && (
             <p className="poker-turn-indicator">
-              {isMyTurn ? 'Jsi na tahu!' : `Čekej, hraje hráč ${session.to_act_seat ?? '?'}…`}
+              {isMyTurn
+                ? lang === 'en'
+                  ? "It's your turn!"
+                  : 'Jsi na tahu!'
+                : lang === 'en'
+                  ? `Wait, player ${session.to_act_seat ?? '?'} is playing…`
+                  : `Čekej, hraje hráč ${session.to_act_seat ?? '?'}…`}
             </p>
           )}
 
           {displayPhase === 'playing' && isMyTurn && myPlayer && (
             <div className="poker-actions">
               <button type="button" onClick={() => act('fold')} disabled={acting} className="poker-fold">
-                Složit
+                {lang === 'en' ? 'Fold' : 'Složit'}
               </button>
               {canCheck ? (
                 <button type="button" onClick={() => act('check')} disabled={acting}>
-                  Zkontrolovat
+                  {lang === 'en' ? 'Check' : 'Zkontrolovat'}
                 </button>
               ) : (
                 <button type="button" onClick={() => act('call')} disabled={acting || callAmount <= 0}>
-                  Dorovnat {callAmount}
+                  {lang === 'en' ? 'Call' : 'Dorovnat'} {callAmount}
                 </button>
               )}
               {allInTotal > session.current_bet && (
@@ -446,7 +472,13 @@ export function PokerGamePage() {
                     onClick={() => act(session.current_bet === 0 ? 'bet' : 'raise', raiseAmount)}
                     disabled={acting}
                   >
-                    {session.current_bet === 0 ? 'Vsadit' : 'Navýšit na'}
+                    {session.current_bet === 0
+                      ? lang === 'en'
+                        ? 'Bet'
+                        : 'Vsadit'
+                      : lang === 'en'
+                        ? 'Raise to'
+                        : 'Navýšit na'}
                   </button>
                   <button type="button" className="poker-secondary" onClick={() => act('raise', allInTotal)} disabled={acting}>
                     All-in ({allInTotal})
@@ -460,31 +492,49 @@ export function PokerGamePage() {
             <div className="poker-result">
               {session.last_result.type === 'fold_win' ? (
                 <p>
-                  Hráč {session.last_result.winner_seats?.[0]} vyhrál pot ({session.last_result.amount}) - ostatní
-                  složili karty.
+                  {lang === 'en' ? (
+                    <>
+                      Player {session.last_result.winner_seats?.[0]} won the pot ({session.last_result.amount}) -
+                      everyone else folded.
+                    </>
+                  ) : (
+                    <>
+                      Hráč {session.last_result.winner_seats?.[0]} vyhrál pot ({session.last_result.amount}) -
+                      ostatní složili karty.
+                    </>
+                  )}
                 </p>
               ) : (
                 <>
                   <ul className="poker-reveals">
                     {session.last_result.reveals?.map((r) => (
                       <li key={r.seat}>
-                        Hráč {r.seat}: {r.cards.map((c) => `${c.rank}${SUIT_SYMBOL[c.suit]}`).join(' ')} —{' '}
-                        {CATEGORY_LABEL[r.category] ?? '?'}
+                        {lang === 'en' ? 'Player' : 'Hráč'} {r.seat}:{' '}
+                        {r.cards.map((c) => `${c.rank}${SUIT_SYMBOL[c.suit]}`).join(' ')} —{' '}
+                        {CATEGORY_LABEL[r.category]?.[lang] ?? '?'}
                       </li>
                     ))}
                   </ul>
                   <ul className="poker-pots">
                     {session.last_result.pots?.map((pot, i) => (
                       <li key={i}>
-                        Pot {pot.amount}: vyhrál{pot.winners.length > 1 ? 'i' : ''} hráč{pot.winners.length > 1 ? 'i' : ''}{' '}
-                        {pot.winners.join(', ')}
+                        {lang === 'en' ? (
+                          <>
+                            Pot {pot.amount}: won by player{pot.winners.length > 1 ? 's' : ''} {pot.winners.join(', ')}
+                          </>
+                        ) : (
+                          <>
+                            Pot {pot.amount}: vyhrál{pot.winners.length > 1 ? 'i' : ''} hráč
+                            {pot.winners.length > 1 ? 'i' : ''} {pot.winners.join(', ')}
+                          </>
+                        )}
                       </li>
                     ))}
                   </ul>
                 </>
               )}
               <button type="button" onClick={nextHand} disabled={acting}>
-                {acting ? 'Rozdávám…' : 'Další kolo'}
+                {acting ? (lang === 'en' ? 'Dealing…' : 'Rozdávám…') : lang === 'en' ? 'Next round' : 'Další kolo'}
               </button>
             </div>
           )}
@@ -493,9 +543,17 @@ export function PokerGamePage() {
 
       {displayPhase === 'finished' && session && (
         <div className="game-result">
-          <p>{session.winner_seat === mySeatNo ? 'Vyhrál jsi celý stůl! 🎉' : `Hru vyhrál hráč ${session.winner_seat}.`}</p>
+          <p>
+            {session.winner_seat === mySeatNo
+              ? lang === 'en'
+                ? 'You won the whole table! 🎉'
+                : 'Vyhrál jsi celý stůl! 🎉'
+              : lang === 'en'
+                ? `Player ${session.winner_seat} won the game.`
+                : `Hru vyhrál hráč ${session.winner_seat}.`}
+          </p>
           <button type="button" onClick={resetToIdle}>
-            Hrát znovu
+            {lang === 'en' ? 'Play again' : 'Hrát znovu'}
           </button>
         </div>
       )}

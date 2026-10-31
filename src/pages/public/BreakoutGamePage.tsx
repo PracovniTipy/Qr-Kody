@@ -2,9 +2,12 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabaseClient'
 import { BreakoutGame } from '../../games/BreakoutGame'
+import { LanguageSwitcher } from '../../components/LanguageSwitcher'
+import { useLanguage } from '../../lib/language'
 
 const GAME_ID = 'breakout'
-const GAME_LABEL = 'Rozbíjení lahví'
+const GAME_LABEL_CS = 'Rozbíjení lahví'
+const GAME_LABEL_EN = 'Bottle smash'
 
 interface LeaderboardEntry {
   nickname: string
@@ -15,17 +18,19 @@ interface LeaderboardEntry {
 type Phase = 'idle' | 'playing' | 'result'
 
 /**
- * Etapa 4 (masterplán, kapitola 11): pátá a poslední arkádová hra se skóre
- * pro hosty u stolu – stejná kostra jako GamePage, FlappyGamePage,
- * RunnerGamePage a ClimbGamePage, jen napojená na BreakoutGame a herní ID
- * 'breakout'. Server (start_game_session / submit_game_score, migrace
- * 0008–0013) hlídá realistickou délku hraní a maximální možné skóre pro
- * danou hru. Žebříček (get_game_leaderboard) je veřejný a anonymní –
- * hráčské účty (kapitola 9, Etapa 9) zatím nejsou, jen volná přezdívka u
- * skóre.
+ * Etapa 4 (masterplán, kapitola 11): arkádová hra pro hosty u stolu – stejná
+ * kostra jako GamePage (Chytání padajících surovin), jen napojená na
+ * BreakoutGame a herní ID 'breakout'. Server (start_game_session /
+ * submit_game_score, migrace 0008-0010) hlídá realistickou délku hraní a
+ * maximální možné skóre pro danou hru. Žebříček (get_game_leaderboard) je
+ * veřejný a anonymní – hráčské účty (kapitola 9, Etapa 9) zatím nejsou, jen
+ * dobrovolná přezdívka u skóre.
+ *
+ * Etapa 5b: UI text dvojjazyčně (CS/EN) podle globálního přepínače jazyka.
  */
 export function BreakoutGamePage() {
   const { venueSlug, tableToken } = useParams<{ venueSlug: string; tableToken: string }>()
+  const { lang } = useLanguage()
   const [phase, setPhase] = useState<Phase>('idle')
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [finalScore, setFinalScore] = useState<number | null>(null)
@@ -57,7 +62,7 @@ export function BreakoutGamePage() {
       p_game_id: GAME_ID,
     })
     if (startError || !data) {
-      setError('Hru se nepodařilo spustit. Zkus to znovu.')
+      setError(lang === 'en' ? "Couldn't start the game. Try again." : 'Hru se nepodařilo spustit. Zkus to znovu.')
       return
     }
     setSessionId((data as { session_id: string }).session_id)
@@ -83,7 +88,7 @@ export function BreakoutGamePage() {
     setSaving(false)
     const result = data as { ok: boolean; rank?: number } | null
     if (submitError || !result || !result.ok) {
-      setError('Skóre se nepodařilo uložit.')
+      setError(lang === 'en' ? "Couldn't save the score." : 'Skóre se nepodařilo uložit.')
       return
     }
     setSavedRank(result.rank ?? null)
@@ -102,10 +107,11 @@ export function BreakoutGamePage() {
   return (
     <div className="game-page">
       <header>
+        <LanguageSwitcher />
         <Link to={`/v/${venueSlug ?? ''}/t/${tableToken ?? ''}`} className="back-link">
-          ← Zpět ke stolu
+          {lang === 'en' ? '← Back to table' : '← Zpět ke stolu'}
         </Link>
-        <h1>{GAME_LABEL}</h1>
+        <h1>{lang === 'en' ? GAME_LABEL_EN : GAME_LABEL_CS}</h1>
       </header>
 
       {error && <p className="error">{error}</p>}
@@ -113,11 +119,13 @@ export function BreakoutGamePage() {
       {phase === 'idle' && (
         <div className="game-idle">
           <button type="button" onClick={startGame}>
-            Hrát
+            {lang === 'en' ? 'Play' : 'Hrát'}
           </button>
           {savedRank !== null && finalScore !== null && (
             <p className="game-result-hint">
-              Uloženo! Tvoje skóre {finalScore} je aktuálně na {savedRank}. místě.
+              {lang === 'en'
+                ? `Saved! Your score ${finalScore} is currently rank ${savedRank}.`
+                : `Uloženo! Tvoje skóre ${finalScore} je aktuálně na ${savedRank}. místě.`}
             </p>
           )}
         </div>
@@ -127,28 +135,28 @@ export function BreakoutGamePage() {
 
       {phase === 'result' && finalScore !== null && (
         <div className="game-result">
-          <p>Konec hry! Skóre: {finalScore}</p>
+          <p>{lang === 'en' ? `Game over! Score: ${finalScore}` : `Konec hry! Skóre: ${finalScore}`}</p>
           <input
             value={nickname}
             onChange={(e) => setNickname(e.target.value.slice(0, 20))}
-            placeholder="Přezdívka (nepovinná)"
+            placeholder={lang === 'en' ? 'Nickname (optional)' : 'Přezdívka (nepovinné)'}
             maxLength={20}
           />
           <div className="game-result-actions">
             <button type="button" onClick={submitScore} disabled={saving}>
-              {saving ? 'Ukládám…' : 'Uložit skóre'}
+              {saving ? (lang === 'en' ? 'Saving…' : 'Ukládám…') : lang === 'en' ? 'Save score' : 'Uložit skóre'}
             </button>
             <button type="button" onClick={playAgain} disabled={saving}>
-              Zahodit
+              {lang === 'en' ? 'Discard' : 'Zahodit'}
             </button>
           </div>
         </div>
       )}
 
       <section className="leaderboard">
-        <h2>Žebříček hospody</h2>
+        <h2>{lang === 'en' ? 'Pub leaderboard' : 'Žebříček hospody'}</h2>
         {leaderboard.length === 0 ? (
-          <p>Zatím žádné skóre.</p>
+          <p>{lang === 'en' ? 'No scores yet.' : 'Zatím žádné skóre.'}</p>
         ) : (
           <ol className="leaderboard-list">
             {leaderboard.map((entry, i) => (

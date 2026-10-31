@@ -10,6 +10,8 @@ import {
   DamaSessionRow,
   DamaSquare,
 } from '../../types/dama'
+import { LanguageSwitcher } from '../../components/LanguageSwitcher'
+import { Lang, useLanguage } from '../../lib/language'
 
 const STORAGE_PREFIX = 'dama_player_'
 
@@ -51,23 +53,19 @@ function clearSavedPlayer(tableToken: string) {
   }
 }
 
-function mapReason(reason?: string): string {
-  switch (reason) {
-    case 'not_your_turn':
-      return 'Teď je na tahu soupeř.'
-    case 'must_capture':
-      return 'Musíš brát - braní je povinné.'
-    case 'must_continue':
-      return 'Musíš pokračovat v braní stejným kamenem.'
-    case 'invalid_move':
-      return 'Tenhle tah není možný.'
-    case 'not_playing':
-      return 'Hra právě neběží.'
-    case 'invalid_token':
-      return 'Neplatná relace, zkus obnovit stránku.'
-    default:
-      return 'Tah se nepodařil, zkus to znovu.'
-  }
+const REASON_LABELS: Record<string, { cs: string; en: string }> = {
+  not_your_turn: { cs: 'Teď je na tahu soupeř.', en: "It's your opponent's turn now." },
+  must_capture: { cs: 'Musíš brát - braní je povinné.', en: 'You must capture - capturing is mandatory.' },
+  must_continue: { cs: 'Musíš pokračovat v braní stejným kamenem.', en: 'You must continue capturing with the same piece.' },
+  invalid_move: { cs: 'Tenhle tah není možný.', en: "This move isn't possible." },
+  not_playing: { cs: 'Hra právě neběží.', en: 'The game is not running right now.' },
+  invalid_token: { cs: 'Neplatná relace, zkus obnovit stránku.', en: 'Invalid session, try reloading the page.' },
+}
+
+function mapReason(reason: string | undefined, lang: Lang): string {
+  const entry = reason ? REASON_LABELS[reason] : undefined
+  if (entry) return lang === 'en' ? entry.en : entry.cs
+  return lang === 'en' ? "Move failed, try again." : 'Tah se nepodařil, zkus to znovu.'
 }
 
 function pieceColor(p: DamaSquare): 'w' | 'b' | null {
@@ -142,9 +140,12 @@ function anyCaptureAvailable(board: DamaSquare[], color: 'w' | 'b'): boolean {
  * Deska se hráči 2 (černý) zobrazuje otočená vzhůru nohama, ať má taky své
  * kameny dole u sebe - server ale vždy pracuje s kanonickými souřadnicemi
  * (řádek 0 nahoře, bílý dole), otočení je čistě vizuální na klientovi.
+ *
+ * Etapa 5b: UI text dvojjazyčně (CS/EN) podle globálního přepínače jazyka.
  */
 export function DamaGamePage() {
   const { venueSlug, tableToken } = useParams<{ venueSlug: string; tableToken: string }>()
+  const { lang } = useLanguage()
 
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [myToken, setMyToken] = useState<string | null>(null)
@@ -246,13 +247,13 @@ export function DamaGamePage() {
       const { data: createData } = await supabase.rpc('dama_create_game', { p_qr_token: tableToken })
       const createResult = createData as DamaCreateGameResult | null
       if (!createResult) {
-        setError('Hru se nepodařilo založit. Zkus to znovu.')
+        setError(lang === 'en' ? "Couldn't create the game. Try again." : 'Hru se nepodařilo založit. Zkus to znovu.')
         setStarting(false)
         return
       }
       applyNewPlayer(createResult.session_id, createResult.player_token, createResult.player_no)
     } catch {
-      setError('Hru se nepodařilo spustit. Zkus to znovu.')
+      setError(lang === 'en' ? "Couldn't start the game. Try again." : 'Hru se nepodařilo spustit. Zkus to znovu.')
     }
     setStarting(false)
   }
@@ -293,7 +294,7 @@ export function DamaGamePage() {
       p_to: to,
     })
     const result = data as DamaMoveResult | null
-    if (!result?.ok) setError(mapReason(result?.reason))
+    if (!result?.ok) setError(mapReason(result?.reason, lang))
     setSelected(null)
     await loadSession()
     setActing(false)
@@ -333,10 +334,11 @@ export function DamaGamePage() {
   return (
     <div className="game-page dama-page">
       <header>
+        <LanguageSwitcher />
         <Link to={`/v/${venueSlug ?? ''}/t/${tableToken ?? ''}`} className="back-link">
-          ← Zpět ke stolu
+          {lang === 'en' ? '← Back to table' : '← Zpět ke stolu'}
         </Link>
-        <h1>⚫ Dáma</h1>
+        <h1>{lang === 'en' ? '⚫ Checkers' : '⚫ Dáma'}</h1>
       </header>
 
       {error && <p className="error">{error}</p>}
@@ -344,20 +346,31 @@ export function DamaGamePage() {
       {displayPhase === 'idle' && (
         <div className="game-idle">
           <p>
-            Dáma je desková hra pro dva hráče u stejného stolu - každý na svém telefonu. Braní je povinné - pokud
-            můžeš brát, musíš. Ťukni na Hrát a druhý host ať udělá to samé.
+            {lang === 'en'
+              ? 'Checkers is a board game for two players at the same table - each on their own phone. Capturing is mandatory - if you can capture, you must. Tap Play and have the other guest do the same.'
+              : 'Dáma je desková hra pro dva hráče u stejného stolu - každý na svém telefonu. Braní je povinné - pokud můžeš brát, musíš. Ťukni na Hrát a druhý host ať udělá to samé.'}
           </p>
           <button type="button" onClick={startOrJoin} disabled={starting}>
-            {starting ? 'Hledám hru…' : 'Hrát Dámu'}
+            {starting
+              ? lang === 'en'
+                ? 'Looking for a game…'
+                : 'Hledám hru…'
+              : lang === 'en'
+                ? 'Play Checkers'
+                : 'Hrát Dámu'}
           </button>
         </div>
       )}
 
       {displayPhase === 'waiting' && (
         <div className="game-idle">
-          <p>Čekám na druhého hráče… Ať se druhý host u stejného stolu taky ťukne na "Dáma" a připojí se.</p>
+          <p>
+            {lang === 'en'
+              ? 'Waiting for the second player… Have the other guest at the same table tap "Checkers" and join too.'
+              : 'Čekám na druhého hráče… Ať se druhý host u stejného stolu taky ťukne na "Dáma" a připojí se.'}
+          </p>
           <button type="button" onClick={resetToIdle}>
-            Zrušit hledání
+            {lang === 'en' ? 'Cancel search' : 'Zrušit hledání'}
           </button>
         </div>
       )}
@@ -365,10 +378,27 @@ export function DamaGamePage() {
       {displayPhase === 'playing' && session && (
         <div className="dama-board-wrap">
           <p className="dama-color-indicator">
-            Hraješ za: {myColor === 'w' ? '⚪ bílé' : '⚫ černé'}
+            {lang === 'en' ? 'Playing as: ' : 'Hraješ za: '}
+            {myColor === 'w'
+              ? lang === 'en'
+                ? '⚪ white'
+                : '⚪ bílé'
+              : lang === 'en'
+                ? '⚫ black'
+                : '⚫ černé'}
           </p>
           <p className="dama-turn-indicator">
-            {isMyTurn ? (captureMandatory ? 'Jsi na tahu - musíš brát!' : 'Jsi na tahu!') : 'Čekej, hraje soupeř…'}
+            {isMyTurn
+              ? captureMandatory
+                ? lang === 'en'
+                  ? "It's your turn - you must capture!"
+                  : 'Jsi na tahu - musíš brát!'
+                : lang === 'en'
+                  ? "It's your turn!"
+                  : 'Jsi na tahu!'
+              : lang === 'en'
+                ? 'Wait, opponent is playing…'
+                : 'Čekej, hraje soupeř…'}
           </p>
           <div className="dama-board">
             {orderedSquares.map((idx) => {
@@ -403,9 +433,17 @@ export function DamaGamePage() {
 
       {displayPhase === 'finished' && session && (
         <div className="game-result">
-          <p>{session.winner === myPlayerNo ? 'Vyhrál jsi! 🎉' : 'Prohrál jsi.'}</p>
+          <p>
+            {session.winner === myPlayerNo
+              ? lang === 'en'
+                ? 'You won! 🎉'
+                : 'Vyhrál jsi! 🎉'
+              : lang === 'en'
+                ? 'You lost.'
+                : 'Prohrál jsi.'}
+          </p>
           <button type="button" onClick={resetToIdle}>
-            Hrát znovu
+            {lang === 'en' ? 'Play again' : 'Hrát znovu'}
           </button>
         </div>
       )}

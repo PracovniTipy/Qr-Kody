@@ -8,6 +8,8 @@ import {
   FlaskaSessionRow,
   FlaskaSpinResult,
 } from '../../types/flaska'
+import { LanguageSwitcher } from '../../components/LanguageSwitcher'
+import { useLanguage } from '../../lib/language'
 
 const STORAGE_PREFIX = 'flaska_player_'
 
@@ -54,9 +56,14 @@ function clearSavedPlayer(tableToken: string) {
  * jednoho z hráčů jako cíl a nahodnou kartu (Pravda/Úkol) z pevné banky.
  * Žádná skrytá informace, žádné kolo/tah - stav se čte z flaska_sessions
  * (Realtime + záložní polling, stejný vzor jako u ostatních her).
+ *
+ * Etapa 5b: UI text dvojjazyčně (CS/EN) podle globálního přepínače jazyka.
+ * Samotné texty karet (lastSpin.text) jdou z pevné banky na serveru a
+ * zůstávají česky - překlad bankovních textů není v téhle etapě v rozsahu.
  */
 export function FlaskaGamePage() {
   const { venueSlug, tableToken } = useParams<{ venueSlug: string; tableToken: string }>()
+  const { lang } = useLanguage()
 
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [myPlayerId, setMyPlayerId] = useState<string | null>(null)
@@ -136,7 +143,7 @@ export function FlaskaGamePage() {
     if (!tableToken || joining) return
     const trimmed = nameInput.trim()
     if (!trimmed) {
-      setError('Napiš, prosím, své jméno nebo přezdívku.')
+      setError(lang === 'en' ? 'Please enter your name or nickname.' : 'Napiš, prosím, své jméno nebo přezdívku.')
       return
     }
     setJoining(true)
@@ -146,7 +153,9 @@ export function FlaskaGamePage() {
       const { data: sessData } = await supabase.rpc('flaska_get_or_create_session', { p_qr_token: tableToken })
       const sessResult = sessData as FlaskaGetOrCreateSessionResult | null
       if (!sessResult?.session_id) {
-        setError('Hru se nepodařilo najít ani založit. Zkus to znovu.')
+        setError(
+          lang === 'en' ? "Couldn't find or create the game. Try again." : 'Hru se nepodařilo najít ani založit. Zkus to znovu.'
+        )
         setJoining(false)
         return
       }
@@ -160,8 +169,12 @@ export function FlaskaGamePage() {
       if (!joinResult?.ok || !joinResult.player_id || !joinResult.player_token) {
         setError(
           joinResult?.reason === 'full'
-            ? 'U stolu je už plno (max 10 hráčů).'
-            : 'Připojení se nepodařilo. Zkus to znovu.'
+            ? lang === 'en'
+              ? 'The table is already full (max 10 players).'
+              : 'U stolu je už plno (max 10 hráčů).'
+            : lang === 'en'
+              ? "Couldn't join. Try again."
+              : 'Připojení se nepodařilo. Zkus to znovu.'
         )
         setJoining(false)
         return
@@ -181,7 +194,7 @@ export function FlaskaGamePage() {
       setMyToken(player.playerToken)
       setMyName(player.name)
     } catch {
-      setError('Připojení se nepodařilo. Zkus to znovu.')
+      setError(lang === 'en' ? "Couldn't join. Try again." : 'Připojení se nepodařilo. Zkus to znovu.')
     }
     setJoining(false)
   }
@@ -196,7 +209,7 @@ export function FlaskaGamePage() {
     })
     const result = data as FlaskaSpinResult | null
     if (!result?.ok) {
-      setError('Točení se nepodařilo, zkus to znovu.')
+      setError(lang === 'en' ? 'Spin failed, try again.' : 'Točení se nepodařilo, zkus to znovu.')
     }
     await loadSession()
     setSpinning(false)
@@ -223,10 +236,11 @@ export function FlaskaGamePage() {
   return (
     <div className="game-page flaska-page">
       <header>
+        <LanguageSwitcher />
         <Link to={`/v/${venueSlug ?? ''}/t/${tableToken ?? ''}`} className="back-link">
-          ← Zpět ke stolu
+          {lang === 'en' ? '← Back to table' : '← Zpět ke stolu'}
         </Link>
-        <h1>🍾 Flaška</h1>
+        <h1>{lang === 'en' ? '🍾 Spin the Bottle' : '🍾 Flaška'}</h1>
       </header>
 
       {error && <p className="error">{error}</p>}
@@ -234,19 +248,20 @@ export function FlaskaGamePage() {
       {!joined && (
         <div className="game-idle flaska-join">
           <p>
-            Flaška je společenská hra pro celý stůl (až 10 hráčů) - připoj se jménem a kdokoliv pak může zatočit
-            "lahví". Padne na náhodného hráče u stolu a vybere se karta Pravda nebo Úkol.
+            {lang === 'en'
+              ? 'Spin the Bottle is a party game for the whole table (up to 10 players) - join with your name and anyone can then "spin the bottle". It lands on a random player at the table and picks a Truth or Dare card.'
+              : 'Flaška je společenská hra pro celý stůl (až 10 hráčů) - připoj se jménem a kdokoliv pak může zatočit "lahví". Padne na náhodného hráče u stolu a vybere se karta Pravda nebo Úkol.'}
           </p>
           <input
             type="text"
             className="flaska-name-input"
-            placeholder="Tvoje jméno nebo přezdívka"
+            placeholder={lang === 'en' ? 'Your name or nickname' : 'Tvoje jméno nebo přezdívka'}
             value={nameInput}
             maxLength={24}
             onChange={(e) => setNameInput(e.target.value)}
           />
           <button type="button" onClick={joinTable} disabled={joining}>
-            {joining ? 'Připojuji…' : 'Přidat se ke stolu'}
+            {joining ? (lang === 'en' ? 'Joining…' : 'Připojuji…') : lang === 'en' ? 'Join the table' : 'Přidat se ke stolu'}
           </button>
         </div>
       )}
@@ -254,11 +269,14 @@ export function FlaskaGamePage() {
       {joined && session && (
         <div className="flaska-table">
           <p className="flaska-me">
-            Hraješ jako: {session.players.find((p) => p.id === myPlayerId)?.emoji ?? '🦊'} {myName}
+            {lang === 'en' ? 'Playing as: ' : 'Hraješ jako: '}
+            {session.players.find((p) => p.id === myPlayerId)?.emoji ?? '🦊'} {myName}
           </p>
 
           <div className="flaska-players">
-            {players.length === 0 && <p>Zatím tu nikdo není - buď první!</p>}
+            {players.length === 0 && (
+              <p>{lang === 'en' ? "No one's here yet - be the first!" : 'Zatím tu nikdo není - buď první!'}</p>
+            )}
             {players.map((p) => (
               <span key={p.id} className={`flaska-player-chip ${p.id === myPlayerId ? 'me' : ''}`}>
                 {p.emoji} {p.name}
@@ -274,25 +292,36 @@ export function FlaskaGamePage() {
             <div className={`flaska-card ${lastSpin.category} ${iAmTarget ? 'flaska-card-me' : ''}`}>
               <p className="flaska-card-target">
                 {lastSpin.target_emoji} <strong>{lastSpin.target_name}</strong>
-                {iAmTarget && ' (to jsi ty!)'}
+                {iAmTarget && (lang === 'en' ? " (that's you!)" : ' (to jsi ty!)')}
               </p>
-              <p className="flaska-card-category">{lastSpin.category === 'pravda' ? '❓ Pravda' : '🎭 Úkol'}</p>
+              <p className="flaska-card-category">
+                {lastSpin.category === 'pravda'
+                  ? lang === 'en'
+                    ? '❓ Truth'
+                    : '❓ Pravda'
+                  : lang === 'en'
+                    ? '🎭 Dare'
+                    : '🎭 Úkol'}
+              </p>
               <p className="flaska-card-text">{lastSpin.text}</p>
               <p className="flaska-card-meta">
-                Zatočil/a: {lastSpin.spinner_emoji} {lastSpin.spinner_name}
-                {iAmSpinner && ' (ty)'}
+                {lang === 'en' ? 'Spun by: ' : 'Zatočil/a: '}
+                {lastSpin.spinner_emoji} {lastSpin.spinner_name}
+                {iAmSpinner && (lang === 'en' ? ' (you)' : ' (ty)')}
               </p>
             </div>
           ) : (
-            <p className="flaska-hint">Ještě nikdo nezatočil. Ťukni na tlačítko níže!</p>
+            <p className="flaska-hint">
+              {lang === 'en' ? 'No one has spun yet. Tap the button below!' : 'Ještě nikdo nezatočil. Ťukni na tlačítko níže!'}
+            </p>
           )}
 
           <button type="button" className="flaska-spin-btn" onClick={spin} disabled={spinning || players.length < 1}>
-            {spinning ? 'Točím…' : 'Zatočit lahví'}
+            {spinning ? (lang === 'en' ? 'Spinning…' : 'Točím…') : lang === 'en' ? 'Spin the bottle' : 'Zatočit lahví'}
           </button>
 
           <button type="button" className="flaska-leave-btn" onClick={resetToIdle}>
-            Odejít od stolu
+            {lang === 'en' ? 'Leave the table' : 'Odejít od stolu'}
           </button>
         </div>
       )}
