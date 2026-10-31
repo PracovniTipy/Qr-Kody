@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import { useLanguage } from './lib/language'
 import { AdminLoginPage } from './pages/admin/AdminLoginPage'
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage'
 import { AdminVenuePage } from './pages/admin/AdminVenuePage'
@@ -23,6 +24,11 @@ import { RateVenuePage } from './pages/public/RateVenuePage'
 import { TournamentsPage } from './pages/public/TournamentsPage'
 import { VenueMapPage } from './pages/public/VenueMapPage'
 import { VenuePreviewPage } from './pages/public/VenuePreviewPage'
+
+function NotFoundPage() {
+  const { lang } = useLanguage()
+  return <p style={{ padding: 24 }}>{lang === 'en' ? 'Page not found.' : 'Stránka nenalezena.'}</p>
+}
 
 export function App() {
   return (
@@ -56,7 +62,7 @@ export function App() {
       <Route path="/v/:venueSlug/t/:tableToken/turnaje" element={<TournamentsPage />} />
       <Route path="/v/:venueSlug" element={<VenuePreviewPage />} />
 
-      <Route path="*" element={<p style={{ padding: 24 }}>Stránka nenalezena.</p>} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   )
 }
