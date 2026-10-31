@@ -1,5 +1,5 @@
-import { useState } from 'react'
 import { MenuCategory } from '../types/tableContext'
+import { useLanguage } from '../lib/language'
 
 interface MenuListProps {
   categories: MenuCategory[]
@@ -8,36 +8,20 @@ interface MenuListProps {
 }
 
 /**
- * Vícejazyčné menu (masterplán, "co zbývá"): přepínač CS/EN nahoře nad menu.
+ * Vícejazyčné menu (masterplán, "co zbývá"): jazyk se řídí globálním
+ * přepínačem CS/EN (viz src/lib/language.tsx a <LanguageSwitcher />).
  * Chybějící anglický překlad (name_en/description_en) se zobrazí jako fallback
  * na český text - admin tedy nemusí vyplnit překlad pro každou položku.
  */
 export function MenuList({ categories, quantities, onQuantityChange }: MenuListProps) {
-  const [lang, setLang] = useState<'cs' | 'en'>('cs')
+  const { lang } = useLanguage()
 
   if (categories.length === 0) {
-    return <p>Menu zatím není naplněné.</p>
+    return <p>{lang === 'en' ? 'The menu is not filled in yet.' : 'Menu zatím není naplněné.'}</p>
   }
 
   return (
     <div className="menu-list">
-      <div className="menu-lang-toggle">
-        <button
-          type="button"
-          className={lang === 'cs' ? 'active' : ''}
-          onClick={() => setLang('cs')}
-        >
-          CS
-        </button>
-        <button
-          type="button"
-          className={lang === 'en' ? 'active' : ''}
-          onClick={() => setLang('en')}
-        >
-          EN
-        </button>
-      </div>
-
       {categories
         .slice()
         .sort((a, b) => a.sort_order - b.sort_order)

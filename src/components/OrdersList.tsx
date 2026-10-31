@@ -1,10 +1,19 @@
 import { OrderStatus, OrderSummary } from '../types/order'
+import { useLanguage } from '../lib/language'
 
-const STATUS_LABELS: Record<OrderStatus, string> = {
-  nova: 'Přijato',
-  pripravuje_se: 'Připravuje se',
-  hotovo: 'Hotovo',
-  zrusena: 'Zrušeno',
+const STATUS_LABELS: Record<'cs' | 'en', Record<OrderStatus, string>> = {
+  cs: {
+    nova: 'Přijato',
+    pripravuje_se: 'Připravuje se',
+    hotovo: 'Hotovo',
+    zrusena: 'Zrušeno',
+  },
+  en: {
+    nova: 'Received',
+    pripravuje_se: 'Being prepared',
+    hotovo: 'Ready',
+    zrusena: 'Cancelled',
+  },
 }
 
 /**
@@ -13,17 +22,18 @@ const STATUS_LABELS: Record<OrderStatus, string> = {
  * stejný vzor jako get_table_context (viz supabase/migrations/0005_orders.sql).
  */
 export function OrdersList({ orders }: { orders: OrderSummary[] }) {
+  const { lang } = useLanguage()
   if (orders.length === 0) return null
 
   return (
     <section className="orders-list">
-      <h2>Moje objednávky</h2>
+      <h2>{lang === 'en' ? 'My orders' : 'Moje objednávky'}</h2>
       <ul className="entity-list">
         {orders.map((order) => (
           <li key={order.id}>
             <div className="entity-main">
               <span className={`order-status order-status-${order.status}`}>
-                {STATUS_LABELS[order.status]}
+                {STATUS_LABELS[lang][order.status]}
               </span>
               <ul className="order-items">
                 {order.items.map((it, idx) => (

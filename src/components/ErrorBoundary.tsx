@@ -36,15 +36,25 @@ export class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
+      // ErrorBoundary obaluje i LanguageProvider (musí umět zachytit chybu
+      // odkudkoliv), takže si jazyk čte přímo z localStorage, ne přes kontext.
+      let lang: 'cs' | 'en' = 'cs'
+      try {
+        lang = localStorage.getItem('stulhraje_lang_v1') === 'en' ? 'en' : 'cs'
+      } catch {
+        // ignore
+      }
+
       return (
         <div className="crash-fallback">
-          <h1>Něco se pokazilo</h1>
+          <h1>{lang === 'en' ? 'Something went wrong' : 'Něco se pokazilo'}</h1>
           <p>
-            Stránka narazila na neočekávanou chybu. Zkus ji prosím obnovit – pokud problém
-            přetrvá, přivolej obsluhu.
+            {lang === 'en'
+              ? 'The page hit an unexpected error. Please try reloading it – if the problem persists, call over the staff.'
+              : 'Stránka narazila na neočekávanou chybu. Zkus ji prosím obnovit – pokud problém přetrvá, přivolej obsluhu.'}
           </p>
           <button type="button" onClick={this.handleReload}>
-            Obnovit stránku
+            {lang === 'en' ? 'Reload page' : 'Obnovit stránku'}
           </button>
         </div>
       )

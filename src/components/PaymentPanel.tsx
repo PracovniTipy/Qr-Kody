@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import * as QRCode from 'qrcode'
+import { useLanguage } from '../lib/language'
 
 interface Props {
   amount: number
@@ -29,6 +30,7 @@ function buildSpdPayload(iban: string, amountCzk: number, message: string) {
  * částku a odkážeme hosta na obsluhu.
  */
 export function PaymentPanel({ amount, bankAccount, venueName, tableLabel }: Props) {
+  const { lang } = useLanguage()
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
 
   useEffect(() => {
@@ -53,15 +55,19 @@ export function PaymentPanel({ amount, bankAccount, venueName, tableLabel }: Pro
 
   return (
     <section className="payment-panel">
-      <h2>K zaplacení</h2>
+      <h2>{lang === 'en' ? 'To pay' : 'K zaplacení'}</h2>
       <p className="payment-amount">{amount} Kč</p>
       {qrDataUrl ? (
         <>
-          <img src={qrDataUrl} alt="QR platba" className="payment-qr" />
-          <p className="payment-hint">Naskenuj bankovní appkou a zaplať.</p>
+          <img src={qrDataUrl} alt={lang === 'en' ? 'QR payment' : 'QR platba'} className="payment-qr" />
+          <p className="payment-hint">
+            {lang === 'en' ? 'Scan with your banking app and pay.' : 'Naskenuj bankovní appkou a zaplať.'}
+          </p>
         </>
       ) : (
-        <p className="payment-hint">Platbu prosím vyřiď u obsluhy.</p>
+        <p className="payment-hint">
+          {lang === 'en' ? 'Please pay with staff directly.' : 'Platbu prosím vyřiď u obsluhy.'}
+        </p>
       )}
     </section>
   )

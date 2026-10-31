@@ -1,3 +1,5 @@
+import { useLanguage } from '../lib/language'
+
 interface Props {
   isOnline: boolean
   pendingCount: number
@@ -10,16 +12,32 @@ interface Props {
  * připojení vrátí.
  */
 export function OfflineBanner({ isOnline, pendingCount }: Props) {
+  const { lang } = useLanguage()
   if (isOnline && pendingCount === 0) return null
 
   return (
     <div className="offline-banner" role="status">
-      {!isOnline && <span>📶 Jsi offline – appka funguje dál, jen bez čerstvých dat.</span>}
+      {!isOnline && (
+        <span>
+          {lang === 'en'
+            ? "📶 You're offline – the app keeps working, just without fresh data."
+            : '📶 Jsi offline – appka funguje dál, jen bez čerstvých dat.'}
+        </span>
+      )}
       {pendingCount > 0 && (
         <span>
           {isOnline ? ' ' : ' · '}
-          ⏳ {pendingCount} {pendingCount === 1 ? 'objednávka čeká' : 'objednávky čekají'} na odeslání
-          {isOnline ? ', odesílám…' : ', odešle se po připojení.'}
+          {lang === 'en' ? (
+            <>
+              ⏳ {pendingCount} {pendingCount === 1 ? 'order' : 'orders'} waiting to be sent
+              {isOnline ? ', sending…' : ', will send once connected.'}
+            </>
+          ) : (
+            <>
+              ⏳ {pendingCount} {pendingCount === 1 ? 'objednávka čeká' : 'objednávky čekají'} na odeslání
+              {isOnline ? ', odesílám…' : ', odešle se po připojení.'}
+            </>
+          )}
         </span>
       )}
     </div>
